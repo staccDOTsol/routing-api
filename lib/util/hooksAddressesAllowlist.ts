@@ -2,7 +2,7 @@ import { ChainId } from '@uniswap/sdk-core'
 import { ADDRESS_ZERO } from '@uniswap/router-sdk'
 
 export const extraHooksAddressesOnSepolia = '0x0000000000000000000000000000000000000020'
-
+export const jareHook1 = '0x0B5c294841bEa8D19c5605b1E413538DC68118e0'
 // we do not allow v4 pools with non-zero hook address to be routed through in the initial v4 launch.
 // this is the ultimate safeguard in the routing subgraph pool cron job.
 export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = {
@@ -25,7 +25,7 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.AVALANCHE]: [ADDRESS_ZERO],
   [ChainId.BASE_GOERLI]: [ADDRESS_ZERO],
   [ChainId.BASE_SEPOLIA]: [ADDRESS_ZERO],
-  [ChainId.BASE]: [ADDRESS_ZERO],
+  [ChainId.BASE]: [ADDRESS_ZERO, jareHook1],
   [ChainId.ZORA]: [ADDRESS_ZERO],
   [ChainId.ZORA_SEPOLIA]: [ADDRESS_ZERO],
   [ChainId.ROOTSTOCK]: [ADDRESS_ZERO],
