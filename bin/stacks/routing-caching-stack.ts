@@ -326,7 +326,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
         `PoolCacheLambda-ChainId${chainId}-Protocol${protocol}`,
         {
           role: lambdaRole,
-          runtime: aws_lambda.Runtime.NODEJS_18_X,
+          runtime: aws_lambda.Runtime.NODEJS_22_X,
           entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
           handler: 'handler',
           timeout: Duration.seconds(900),
@@ -453,7 +453,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
 
     const tokenListCachingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'TokenListCacheLambda', {
       role: lambdaRole,
-      runtime: aws_lambda.Runtime.NODEJS_18_X,
+      runtime: aws_lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, '../../lib/cron/cache-token-lists.ts'),
       handler: 'handler',
       timeout: Duration.seconds(180),

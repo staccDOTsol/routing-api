@@ -33,7 +33,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
 
     const providerFallbackLambda = new aws_lambda_nodejs.NodejsFunction(this, 'ProviderFallbackLambda', {
       role: lambdaRole,
-      runtime: aws_lambda.Runtime.NODEJS_18_X,
+      runtime: aws_lambda.Runtime.NODEJS_22_X,
       entry: path.join(__dirname, '../../lib/rpc/handler/index.ts'),
       handler: 'fallbackHandler',
       timeout: cdk.Duration.seconds(15),
