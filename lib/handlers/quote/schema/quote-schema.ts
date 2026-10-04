@@ -35,6 +35,10 @@ export const QuoteQueryParamsJoi = Joi.object({
     .max(77) // TODO: validate < 2**256
     .required(),
   type: Joi.string().valid('exactIn', 'exactOut').required(),
+  // Crosschain only: an omni-peg claim token to carry the value across. amount is then whole NFTs.
+  via: Joi.string()
+    .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
+    .optional(),
   // Crosschain only: the X Money escrow ceiling (out) or floor (in), in wei. XSwap is an auction, so nothing derives it.
   xmoneyAmount: Joi.string()
     .pattern(/^[0-9]+$/)
@@ -99,6 +103,7 @@ export type QuoteQueryParams = {
   amount: string
   type: TradeTypeParam
   xmoneyAmount?: string
+  via?: string
   recipient?: string
   slippageTolerance?: string
   deadline?: string

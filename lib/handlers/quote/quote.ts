@@ -22,6 +22,7 @@ import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
 import { ContainerInjected, RequestInjected, SUPPORTED_CHAINS } from '../injector-sor'
 import { quoteXSwap, XSwapQuoteJoi } from '../../xgas/xswap'
+import { quoteOmni, OmniQuoteJoi } from '../../xgas/omni'
 import { QuoteResponse, QuoteResponseSchemaJoi, SupportedPoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
@@ -63,6 +64,11 @@ export class QuoteHandler extends APIGLambdaHandler<
     const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
 
     const q = params.requestQueryParams
+    if (q.tokenInChainId !== q.tokenOutChainId && q.via) {
+      const omni = await quoteOmni({ ...q, via: q.via })
+      metric.putMetric(`GET_QUOTE_OMNI_${'routing' in omni ? 200 : 400}`, 1, MetricLoggerUnit.Count)
+      return 'routing' in omni ? { statusCode: 200, body: omni as unknown as QuoteResponse } : omni
+    }
     if (q.tokenInChainId !== q.tokenOutChainId) {
       const xswap = await quoteXSwap(q)
       metric.putMetric(`GET_QUOTE_XSWAP_${'routing' in xswap ? 200 : 400}`, 1, MetricLoggerUnit.Count)
@@ -954,7 +960,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
-    return Joi.alternatives().try(XSwapQuoteJoi, QuoteResponseSchemaJoi) as unknown as Joi.ObjectSchema
+    return Joi.alternatives().try(OmniQuoteJoi, XSwapQuoteJoi, QuoteResponseSchemaJoi) as unknown as Joi.ObjectSchema
   }
 
   protected afterHandler(metric: MetricsLogger, response: QuoteResponse, requestStart: number): void {
