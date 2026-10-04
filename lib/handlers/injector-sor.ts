@@ -81,6 +81,7 @@ import {
 } from '../util/onChainQuoteProviderConfigs'
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
+import { StaccpadV4SubgraphProvider } from '../xgas/staccpad-pools'
 import { Protocol } from '@uniswap/router-sdk'
 import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
 import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
@@ -713,6 +714,12 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
     } catch (err) {
       switch (protocol) {
         case Protocol.V4:
+          // Robinhood has no subgraph: its pool list is staccpad's own market feed on top of the static pairs
+          if (chainId === ChainId.ROBINHOOD) {
+            return new StaccpadV4SubgraphProvider(
+              new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
+            )
+          }
           return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
         case Protocol.V3:
           return new StaticV3SubgraphProvider(chainId, poolProvider as IV3PoolProvider)
