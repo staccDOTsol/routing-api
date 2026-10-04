@@ -717,7 +717,10 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
           // Robinhood has no subgraph: its pool list is staccpad's own market feed on top of the static pairs
           if (chainId === ChainId.ROBINHOOD) {
             return new StaccpadV4SubgraphProvider(
-              new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
+              chainId,
+              new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams),
+              poolProvider as IV4PoolProvider,
+              v4PoolsParams ?? getApplicableV4FeesTickspacingsHooks(chainId)
             )
           }
           return new StaticV4SubgraphProvider(chainId, poolProvider as IV4PoolProvider, v4PoolsParams)
