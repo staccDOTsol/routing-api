@@ -153,6 +153,8 @@ const GRAPH_SUBGRAPH_IDS: { [protocol: string]: { [chainId: number]: string } } 
   // Base v4 keeps upstream's bearer-token URL: set GRAPH_BEARER_TOKEN and GRAPH_BASE_V4_SUBGRAPH_ID.
   V4: { [ChainId.MAINNET]: 'DiYPVdygkfjDWhbxGSqAQxwBKmfKnkWQojqeM2rkLb3G' },
 }
+// The Graph's indexers reject pages over 3600 rows.
+const GRAPH_PAGE_SIZE = process.env.GRAPH_API_KEY ? 1000 : undefined
 const graphUrl = (protocol: 'V2' | 'V3' | 'V4', chainId: ChainId) => {
   const id = GRAPH_SUBGRAPH_IDS[protocol][chainId]
   return process.env.GRAPH_API_KEY && id
@@ -657,7 +659,7 @@ export const chainProtocols = [
       5,
       900000,
       true,
-      10000,
+      GRAPH_PAGE_SIZE ?? 10000,
       v2BaseTrackedEthThreshold,
       v2UntrackedUsdThreshold,
       v2SubgraphUrlOverride(ChainId.BASE)
