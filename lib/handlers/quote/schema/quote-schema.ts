@@ -1,6 +1,7 @@
 import BaseJoi from '@hapi/joi'
 import { SUPPORTED_CHAINS } from '../../injector-sor'
 import { HooksOptions } from '@uniswap/smart-order-router'
+import { XSWAP_CHAIN_IDS } from '../../../xgas/xswap'
 
 const Joi = BaseJoi.extend((joi) => ({
   base: joi.array(),
@@ -23,17 +24,22 @@ const Joi = BaseJoi.extend((joi) => ({
 export const QuoteQueryParamsJoi = Joi.object({
   tokenInAddress: Joi.string().alphanum().max(42).required(),
   tokenInChainId: Joi.number()
-    .valid(...SUPPORTED_CHAINS.values())
+    .valid(...new Set([...SUPPORTED_CHAINS.values(), ...XSWAP_CHAIN_IDS]))
     .required(),
   tokenOutAddress: Joi.string().alphanum().max(42).required(),
   tokenOutChainId: Joi.number()
-    .valid(...SUPPORTED_CHAINS.values())
+    .valid(...new Set([...SUPPORTED_CHAINS.values(), ...XSWAP_CHAIN_IDS]))
     .required(),
   amount: Joi.string()
     .pattern(/^[0-9]+$/)
     .max(77) // TODO: validate < 2**256
     .required(),
   type: Joi.string().valid('exactIn', 'exactOut').required(),
+  // Crosschain only: the X Money escrow ceiling (out) or floor (in), in wei. XSwap is an auction, so nothing derives it.
+  xmoneyAmount: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .max(77)
+    .optional(),
   recipient: Joi.string()
     .pattern(new RegExp(/^0x[a-fA-F0-9]{40}$/))
     .optional(),
@@ -92,6 +98,7 @@ export type QuoteQueryParams = {
   tokenOutChainId: number
   amount: string
   type: TradeTypeParam
+  xmoneyAmount?: string
   recipient?: string
   slippageTolerance?: string
   deadline?: string

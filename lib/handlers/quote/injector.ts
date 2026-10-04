@@ -12,7 +12,7 @@ import { MetricsLogger } from 'aws-embedded-metrics'
 import { APIGatewayProxyEvent, Context } from 'aws-lambda'
 import { default as bunyan, default as Logger } from 'bunyan'
 import { BigNumber } from 'ethers'
-import { ContainerInjected, InjectorSOR, RequestInjected } from '../injector-sor'
+import { ContainerInjected, InjectorSOR, RequestInjected, SUPPORTED_CHAINS } from '../injector-sor'
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
 import { QuoteQueryParams } from './schema/quote-schema'
@@ -74,7 +74,14 @@ export class QuoteHandlerInjector extends InjectorSOR<
     const metric = new AWSMetricsLogger(metricsLogger)
     setGlobalMetric(metric)
 
-    // Today API is restricted such that both tokens must be on the same chain.
+    // Crosschain quotes are XSwap intents, not pool routes: no router or pool providers to inject.
+    // The same exit covers chains only XSwap reaches, which the handler rejects for same-chain quotes.
+    if (tokenInChainId !== requestQueryParams.tokenOutChainId || !SUPPORTED_CHAINS.includes(tokenInChainId)) {
+      return { id: quoteId, log, metric, chainId: tokenInChainId, quoteSpeed, intent } as unknown as RequestInjected<
+        IRouter<AlphaRouterConfig | LegacyRoutingConfig>
+      >
+    }
+
     const chainId = tokenInChainId
     const chainIdEnum = ID_TO_CHAIN_ID(chainId)
 

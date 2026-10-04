@@ -20,7 +20,8 @@ import { Pool as V4Pool } from '@uniswap/v4-sdk'
 import JSBI from 'jsbi'
 import _ from 'lodash'
 import { APIGLambdaHandler, ErrorResponse, HandleRequestParams, Response } from '../handler'
-import { ContainerInjected, RequestInjected } from '../injector-sor'
+import { ContainerInjected, RequestInjected, SUPPORTED_CHAINS } from '../injector-sor'
+import { quoteXSwap, XSwapQuoteJoi } from '../../xgas/xswap'
 import { QuoteResponse, QuoteResponseSchemaJoi, SupportedPoolInRoute } from '../schema'
 import {
   DEFAULT_ROUTING_CONFIG_BY_CHAIN,
@@ -60,6 +61,16 @@ export class QuoteHandler extends APIGLambdaHandler<
     params: HandleRequestParams<ContainerInjected, RequestInjected<IRouter<any>>, void, QuoteQueryParams>
   ): Promise<Response<QuoteResponse> | ErrorResponse> {
     const { chainId, metric, log, quoteSpeed, intent } = params.requestInjected
+
+    const q = params.requestQueryParams
+    if (q.tokenInChainId !== q.tokenOutChainId) {
+      const xswap = await quoteXSwap(q)
+      metric.putMetric(`GET_QUOTE_XSWAP_${'routing' in xswap ? 200 : 400}`, 1, MetricLoggerUnit.Count)
+      return 'routing' in xswap ? { statusCode: 200, body: xswap as unknown as QuoteResponse } : xswap
+    }
+    if (!SUPPORTED_CHAINS.includes(chainId)) {
+      return { statusCode: 400, errorCode: 'CHAIN_NOT_ROUTABLE', detail: `No pools are routed on chain ${chainId} yet` }
+    }
 
     // Mark the start of core business logic for latency bookkeeping.
     // Note that some time may have elapsed before handleRequest was called, so this
@@ -247,14 +258,6 @@ export class QuoteHandler extends APIGLambdaHandler<
         metric,
       },
     } = params
-    if (tokenInChainId !== tokenOutChainId) {
-      return {
-        statusCode: 400,
-        errorCode: 'TOKEN_CHAINS_DIFFERENT',
-        detail: `Cannot request quotes for tokens on different chains`,
-      }
-    }
-
     const requestSourceHeader = params.event.headers && params.event.headers['x-request-source']
     const appVersion = params.event.headers && params.event.headers['x-app-version']
     const universalRouterVersion = convertStringRouterVersionToEnum(
@@ -951,7 +954,7 @@ export class QuoteHandler extends APIGLambdaHandler<
   }
 
   protected responseBodySchema(): Joi.ObjectSchema | null {
-    return QuoteResponseSchemaJoi
+    return Joi.alternatives().try(XSwapQuoteJoi, QuoteResponseSchemaJoi) as unknown as Joi.ObjectSchema
   }
 
   protected afterHandler(metric: MetricsLogger, response: QuoteResponse, requestStart: number): void {
