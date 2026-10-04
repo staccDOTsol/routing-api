@@ -1195,6 +1195,10 @@ export const NEW_QUOTER_DEPLOY_BLOCK: { [chainId in ChainId]: number } = {
   [ChainId.XLAYER]: -1,
   [ChainId.LINEA]: -1,
   [ChainId.TEMPO]: -1,
+  [ChainId.MEGAETH]: -1,
+  [ChainId.ARC]: -1,
+  [ChainId.ROBINHOOD]: -1,
+  [ChainId.INK]: -1,
 }
 
 // 0 threshold means it's not deployed yet
@@ -1233,6 +1237,10 @@ export const LIKELY_OUT_OF_GAS_THRESHOLD: { [chainId in ChainId]: number } = {
   [ChainId.XLAYER]: 0,
   [ChainId.LINEA]: 0,
   [ChainId.TEMPO]: 0,
+  [ChainId.MEGAETH]: 0,
+  [ChainId.ARC]: 0,
+  [ChainId.ROBINHOOD]: 0,
+  [ChainId.INK]: 0,
 }
 
 // TODO: Move this new addresses to SOR

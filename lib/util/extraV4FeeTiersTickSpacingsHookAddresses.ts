@@ -54,4 +54,8 @@ export const EXTRA_V4_FEE_TICK_SPACINGS_HOOK_ADDRESSES: { [chain in ChainId]: Ar
   [ChainId.XLAYER]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.LINEA]: emptyV4FeeTickSpacingsHookAddresses,
   [ChainId.TEMPO]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.MEGAETH]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.ARC]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.ROBINHOOD]: emptyV4FeeTickSpacingsHookAddresses,
+  [ChainId.INK]: emptyV4FeeTickSpacingsHookAddresses,
 }

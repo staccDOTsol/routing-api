@@ -88,6 +88,7 @@ export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterCo
     case ChainId.BASE_SEPOLIA:
     case ChainId.UNICHAIN:
     case ChainId.SONEIUM:
+    case ChainId.ROBINHOOD:
     case ChainId.XLAYER:
     case ChainId.LINEA:
       return {

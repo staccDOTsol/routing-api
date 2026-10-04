@@ -115,6 +115,7 @@ const UPSTREAM_CHAINS: ChainId[] = [
   ChainId.UNICHAIN,
   ChainId.SONEIUM,
   ChainId.XLAYER,
+  ChainId.ROBINHOOD,
 ]
 // ROUTED_CHAIN_IDS (comma list) narrows the chains this deployment routes. Each chain costs init memory and
 // a set of pool cache crons, so a small account runs a few; unset, it routes everything upstream does.
@@ -389,6 +390,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             case ChainId.BASE_SEPOLIA:
             case ChainId.UNICHAIN:
             case ChainId.SONEIUM:
+            case ChainId.ROBINHOOD:
             case ChainId.XLAYER:
             case ChainId.LINEA:
             default:
@@ -540,6 +542,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.UNICHAIN,
             ChainId.SONEIUM,
             ChainId.XLAYER,
+            ChainId.ROBINHOOD,
             ChainId.LINEA,
           ]
 
@@ -560,6 +563,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.MONAD,
             ChainId.CELO,
             ChainId.XLAYER,
+            ChainId.ROBINHOOD,
             ChainId.LINEA,
           ]
 
@@ -597,6 +601,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.SONEIUM,
             ChainId.MONAD,
             ChainId.XLAYER,
+            ChainId.ROBINHOOD,
             ChainId.LINEA,
           ]
           const mixedSupported = [
@@ -614,6 +619,7 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
             ChainId.ZORA,
             ChainId.SONEIUM,
             ChainId.XLAYER,
+            ChainId.ROBINHOOD,
             ChainId.LINEA,
             ChainId.MONAD,
           ]

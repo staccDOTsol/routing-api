@@ -139,7 +139,30 @@ export const HOOKS_FOR_V4_SUBGRAPH_LOW_TVL_FILTERING = new Set([
   ...CLANKER_HOOKS_FOR_V4_SUBGRAPH_FILTERING,
 ])
 
+// Uniswap's subgraphs on The Graph's network, read with our own GRAPH_API_KEY (thegraph.com/studio).
+// Checked first, so a chain listed here needs none of upstream's Goldsky or Alchemy credentials.
+const GRAPH_SUBGRAPH_IDS: { [protocol: string]: { [chainId: number]: string } } = {
+  V2: {
+    [ChainId.MAINNET]: 'A3Np3RQbaBA6oKJgiwDJeo5T3zrYfGHPWFYayMwtNDum',
+    [ChainId.BASE]: '4jGhpKjW4prWoyt5Bwk1ZHUwdEmNWveJcjEyjoTZWCY9',
+  },
+  V3: {
+    [ChainId.MAINNET]: '5zvR82QoaXYFyDEKLZ9t6v9adgnptxYpKpSbxtgVENFV',
+    [ChainId.BASE]: '43Hwfi3dJSoGpyas9VwNoDAv55yjgGrPpNSmbQZArzMG',
+  },
+  // Base v4 keeps upstream's bearer-token URL: set GRAPH_BEARER_TOKEN and GRAPH_BASE_V4_SUBGRAPH_ID.
+  V4: { [ChainId.MAINNET]: 'DiYPVdygkfjDWhbxGSqAQxwBKmfKnkWQojqeM2rkLb3G' },
+}
+const graphUrl = (protocol: 'V2' | 'V3' | 'V4', chainId: ChainId) => {
+  const id = GRAPH_SUBGRAPH_IDS[protocol][chainId]
+  return process.env.GRAPH_API_KEY && id
+    ? `https://gateway.thegraph.com/api/${process.env.GRAPH_API_KEY}/subgraphs/id/${id}`
+    : undefined
+}
+
 export const v4SubgraphUrlOverride = (chainId: ChainId) => {
+  const graph = graphUrl('V4', chainId)
+  if (graph) return graph
   switch (chainId) {
     case ChainId.SEPOLIA:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_SEPOLIA_V4_ID}`
@@ -181,6 +204,8 @@ export const v4SubgraphUrlOverride = (chainId: ChainId) => {
 }
 
 export const v3SubgraphUrlOverride = (chainId: ChainId) => {
+  const graph = graphUrl('V3', chainId)
+  if (graph) return graph
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap2/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_V3_ID}`
@@ -224,6 +249,8 @@ export const v3SubgraphUrlOverride = (chainId: ChainId) => {
 }
 
 export const v2SubgraphUrlOverride = (chainId: ChainId) => {
+  const graph = graphUrl('V2', chainId)
+  if (graph) return graph
   switch (chainId) {
     case ChainId.MAINNET:
       return `https://api.aws-us-east-1.goldsky.com/c/uniswap/gn/subgraphs/id/${process.env.GOLD_SKY_ETHEREUM_V2_ID}`

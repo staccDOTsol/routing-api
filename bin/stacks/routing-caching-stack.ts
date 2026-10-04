@@ -355,6 +355,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
             GRAPH_XLAYER_V3_ID: this.graphXlayerV3Id ?? '',
             GRAPH_XLAYER_V2_ID: this.graphXLayerV2Id ?? '',
             GRAPH_BEARER_TOKEN: this.graphBearerToken ?? '',
+            GRAPH_API_KEY: process.env.GRAPH_API_KEY ?? '',
             GOLD_SKY_BEARER_TOKEN: this.goldskyBearerToken ?? '',
             GOLD_SKY_API_KEY: this.goldskyApiKey ?? '',
             // Goldsky V2 subgraph IDs

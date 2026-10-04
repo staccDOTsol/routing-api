@@ -1,0 +1,316 @@
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/providers/caching-subgraph-provider.js b/node_modules/@uniswap/smart-order-router/build/main/providers/caching-subgraph-provider.js
+index 543c43e..56570e3 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/providers/caching-subgraph-provider.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/providers/caching-subgraph-provider.js
+@@ -139,6 +139,11 @@ exports.BASES_TO_CHECK_TRADES_AGAINST = {
+         util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.XLAYER],
+         token_provider_1.USDC_XLAYER,
+     ],
++    [sdk_core_1.ChainId.ROBINHOOD]: [
++        (0, util_1.nativeOnChain)(sdk_core_1.ChainId.ROBINHOOD),
++        util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.ROBINHOOD],
++        token_provider_1.USDG_ROBINHOOD,
++    ],
+ };
+ class CachingSubgraphProvider {
+     /**
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/providers/caching-token-provider.js b/node_modules/@uniswap/smart-order-router/build/main/providers/caching-token-provider.js
+index b27e945..7a5e5b6 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/providers/caching-token-provider.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/providers/caching-token-provider.js
+@@ -148,6 +148,10 @@ exports.CACHE_SEED_TOKENS = {
+         USDC: token_provider_1.USDC_XLAYER,
+         WETH: util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.XLAYER],
+     },
++    [sdk_core_1.ChainId.ROBINHOOD]: {
++        USDC: token_provider_1.USDG_ROBINHOOD,
++        WETH: util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.ROBINHOOD],
++    },
+     // Currently we do not have providers for Moonbeam mainnet or Gnosis testnet
+ };
+ /**
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/providers/token-provider.js b/node_modules/@uniswap/smart-order-router/build/main/providers/token-provider.js
+index 4cb576f..33548a3 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/providers/token-provider.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/providers/token-provider.js
+@@ -121,6 +121,7 @@ exports.USDC_WORLDCHAIN = new sdk_core_1.Token(sdk_core_1.ChainId.WORLDCHAIN, '0
+ exports.USDT_MONAD_TESTNET = new sdk_core_1.Token(sdk_core_1.ChainId.MONAD_TESTNET, '0xfBC2D240A5eD44231AcA3A9e9066bc4b33f01149', 6, 'USDT', 'USDT');
+ exports.USDC_MONAD = new sdk_core_1.Token(sdk_core_1.ChainId.MONAD, '0x754704Bc059F8C67012fEd69BC8A327a5aafb603', 6, 'USDC', 'USDC');
+ exports.USDC_XLAYER = new sdk_core_1.Token(sdk_core_1.ChainId.XLAYER, '0x74b7F16337b8972027F6196A17a631aC6dE26d22', 6, 'USDC', 'USDC');
++exports.USDG_ROBINHOOD = new sdk_core_1.Token(sdk_core_1.ChainId.ROBINHOOD, '0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168', 6, 'USDG', 'Global Dollar');
+ exports.WLD_WORLDCHAIN = new sdk_core_1.Token(sdk_core_1.ChainId.WORLDCHAIN, '0x2cFc85d8E48F8EAB294be644d9E25C3030863003', 18, 'WLD', 'Worldcoin');
+ exports.WBTC_WORLDCHAIN = new sdk_core_1.Token(sdk_core_1.ChainId.WORLDCHAIN, '0x03C7054BCB39f7b2e5B2c7AcB37583e32D70Cfa3', 8, 'WBTC', 'Wrapped BTC');
+ exports.USDC_UNICHAIN_SEPOLIA = new sdk_core_1.Token(sdk_core_1.ChainId.UNICHAIN_SEPOLIA, '0x31d0220469e10c4E71834a79b1f276d740d3768F', 6, 'USDC', 'USDC Token');
+@@ -373,6 +374,8 @@ const USDC_ON = (chainId) => {
+             return exports.USDC_SONEIUM;
+         case sdk_core_1.ChainId.MONAD:
+             return exports.USDC_MONAD;
++        case sdk_core_1.ChainId.ROBINHOOD:
++            return exports.USDG_ROBINHOOD;
+         case sdk_core_1.ChainId.XLAYER:
+             return exports.USDC_XLAYER;
+         default:
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/providers/v2/static-subgraph-provider.js b/node_modules/@uniswap/smart-order-router/build/main/providers/v2/static-subgraph-provider.js
+index 3edd32c..50d59ab 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/providers/v2/static-subgraph-provider.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/providers/v2/static-subgraph-provider.js
+@@ -105,6 +105,7 @@ const BASES_TO_CHECK_TRADES_AGAINST = {
+     [sdk_core_1.ChainId.SONEIUM]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.SONEIUM], token_provider_1.USDC_SONEIUM],
+     [sdk_core_1.ChainId.MONAD]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.MONAD], token_provider_1.USDC_MONAD],
+     [sdk_core_1.ChainId.XLAYER]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.XLAYER], token_provider_1.USDC_XLAYER],
++    [sdk_core_1.ChainId.ROBINHOOD]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.ROBINHOOD], token_provider_1.USDG_ROBINHOOD],
+ };
+ /**
+  * Provider that does not get data from an external source and instead returns
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/providers/v3/static-subgraph-provider.js b/node_modules/@uniswap/smart-order-router/build/main/providers/v3/static-subgraph-provider.js
+index 68b9100..24130de 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/providers/v3/static-subgraph-provider.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/providers/v3/static-subgraph-provider.js
+@@ -140,6 +140,7 @@ const BASES_TO_CHECK_TRADES_AGAINST = {
+     ],
+     [sdk_core_1.ChainId.SONEIUM]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.SONEIUM], token_provider_1.USDC_SONEIUM],
+     [sdk_core_1.ChainId.XLAYER]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.XLAYER], token_provider_1.USDC_XLAYER],
++    [sdk_core_1.ChainId.ROBINHOOD]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.ROBINHOOD], token_provider_1.USDG_ROBINHOOD],
+ };
+ /**
+  * Provider that uses a hardcoded list of V3 pools to generate a list of subgraph pools.
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/alpha-router.js b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/alpha-router.js
+index f1fd9af..f5084a6 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/alpha-router.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/alpha-router.js
+@@ -128,6 +128,7 @@ class AlphaRouter {
+                 case sdk_core_1.ChainId.UNICHAIN:
+                 case sdk_core_1.ChainId.BASE_GOERLI:
+                 case sdk_core_1.ChainId.SONEIUM:
++                case sdk_core_1.ChainId.ROBINHOOD:
+                 case sdk_core_1.ChainId.XLAYER:
+                     this.onChainQuoteProvider = new providers_2.OnChainQuoteProvider(chainId, provider, this.multicall2Provider, {
+                         retries: 2,
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/config.js b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/config.js
+index 7f81b90..132c62a 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/config.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/config.js
+@@ -19,6 +19,7 @@ const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId) => {
+         case sdk_core_1.ChainId.MONAD:
+         case sdk_core_1.ChainId.UNICHAIN:
+         case sdk_core_1.ChainId.SONEIUM:
++        case sdk_core_1.ChainId.ROBINHOOD:
+         case sdk_core_1.ChainId.XLAYER:
+             return {
+                 v2PoolSelection: {
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/functions/get-candidate-pools.js b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/functions/get-candidate-pools.js
+index b060b99..78677a5 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/functions/get-candidate-pools.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/functions/get-candidate-pools.js
+@@ -93,6 +93,7 @@ const baseTokensByChain = {
+     ],
+     [sdk_core_1.ChainId.SONEIUM]: [token_provider_1.USDC_SONEIUM, util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.SONEIUM]],
+     [sdk_core_1.ChainId.XLAYER]: [token_provider_1.USDC_XLAYER, util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.XLAYER]],
++    [sdk_core_1.ChainId.ROBINHOOD]: [token_provider_1.USDG_ROBINHOOD, util_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.ROBINHOOD]],
+ };
+ const excludedV3PoolIds = new Set([
+     // https://linear.app/uniswap/issue/CX-1005
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-costs.js b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-costs.js
+index dc0bf61..9384b4a 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-costs.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-costs.js
+@@ -32,6 +32,7 @@ const BASE_SWAP_COST = (id) => {
+         case sdk_core_1.ChainId.MONAD_TESTNET: // TODO: double check on monad gas
+         case sdk_core_1.ChainId.MONAD: // TODO: double check on monad gas
+         case sdk_core_1.ChainId.SONEIUM:
++        case sdk_core_1.ChainId.ROBINHOOD:
+         case sdk_core_1.ChainId.XLAYER:
+             return bignumber_1.BigNumber.from(2000);
+         case sdk_core_1.ChainId.ARBITRUM_ONE:
+@@ -77,6 +78,7 @@ const COST_PER_INIT_TICK = (id) => {
+         case sdk_core_1.ChainId.MONAD_TESTNET: // TODO: double check on monad gas
+         case sdk_core_1.ChainId.MONAD: // TODO: double check on monad gas
+         case sdk_core_1.ChainId.SONEIUM:
++        case sdk_core_1.ChainId.ROBINHOOD:
+         case sdk_core_1.ChainId.XLAYER:
+             return bignumber_1.BigNumber.from(31000);
+         case sdk_core_1.ChainId.ARBITRUM_ONE:
+@@ -120,6 +122,7 @@ const COST_PER_HOP = (id) => {
+         case sdk_core_1.ChainId.MONAD_TESTNET: // TODO: double check on monad gas
+         case sdk_core_1.ChainId.MONAD: // TODO: double check on monad gas
+         case sdk_core_1.ChainId.SONEIUM:
++        case sdk_core_1.ChainId.ROBINHOOD:
+         case sdk_core_1.ChainId.XLAYER:
+             return bignumber_1.BigNumber.from(80000);
+         case sdk_core_1.ChainId.ARBITRUM_ONE:
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-model.js b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-model.js
+index c303879..f811585 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-model.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/routers/alpha-router/gas-models/gas-model.js
+@@ -60,6 +60,7 @@ exports.usdGasTokensByChain = {
+     [sdk_core_1.ChainId.UNICHAIN]: [token_provider_1.DAI_UNICHAIN, token_provider_1.USDC_UNICHAIN],
+     [sdk_core_1.ChainId.SONEIUM]: [token_provider_1.USDC_SONEIUM],
+     [sdk_core_1.ChainId.XLAYER]: [token_provider_1.USDC_XLAYER],
++    [sdk_core_1.ChainId.ROBINHOOD]: [token_provider_1.USDG_ROBINHOOD],
+ };
+ /**
+  * Factory for building gas models that can be used with any route to generate
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/routers/legacy-router/bases.js b/node_modules/@uniswap/smart-order-router/build/main/routers/legacy-router/bases.js
+index 50bb328..2af8dbb 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/routers/legacy-router/bases.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/routers/legacy-router/bases.js
+@@ -89,6 +89,7 @@ const BASES_TO_CHECK_TRADES_AGAINST = (_tokenProvider) => {
+             token_provider_1.USDC_SONEIUM,
+         ],
+         [sdk_core_1.ChainId.XLAYER]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.XLAYER], token_provider_1.USDC_XLAYER],
++        [sdk_core_1.ChainId.ROBINHOOD]: [chains_1.WRAPPED_NATIVE_CURRENCY[sdk_core_1.ChainId.ROBINHOOD], token_provider_1.USDG_ROBINHOOD],
+     };
+ };
+ exports.BASES_TO_CHECK_TRADES_AGAINST = BASES_TO_CHECK_TRADES_AGAINST;
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/util/addresses.js b/node_modules/@uniswap/smart-order-router/build/main/util/addresses.js
+index b025dea..e4a8036 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/util/addresses.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/util/addresses.js
+@@ -11,12 +11,12 @@ exports.BNB_SWAP_ROUTER_02_ADDRESS = sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_
+ exports.BNB_V3_MIGRATOR_ADDRESS = sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].v3MigratorAddress;
+ exports.V3_CORE_FACTORY_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap(v3_sdk_1.FACTORY_ADDRESS)), { [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].v3CoreFactoryAddress, [sdk_core_1.ChainId.CELO_ALFAJORES]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO_ALFAJORES].v3CoreFactoryAddress, [sdk_core_1.ChainId.OPTIMISM_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM_GOERLI].v3CoreFactoryAddress, [sdk_core_1.ChainId.OPTIMISM_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM_SEPOLIA].v3CoreFactoryAddress, [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].v3CoreFactoryAddress, [sdk_core_1.ChainId.ARBITRUM_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_GOERLI].v3CoreFactoryAddress, [sdk_core_1.ChainId.ARBITRUM_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_SEPOLIA].v3CoreFactoryAddress, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].v3CoreFactoryAddress, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].v3CoreFactoryAddress, [sdk_core_1.ChainId.BASE_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_GOERLI].v3CoreFactoryAddress, [sdk_core_1.ChainId.BASE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE].v3CoreFactoryAddress, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].v3CoreFactoryAddress, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].v3CoreFactoryAddress, [sdk_core_1.ChainId.ZKSYNC]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZKSYNC].v3CoreFactoryAddress, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].v3CoreFactoryAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].v3CoreFactoryAddress, [sdk_core_1.ChainId.MONAD_TESTNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD_TESTNET].v3CoreFactoryAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].v3CoreFactoryAddress, [sdk_core_1.ChainId.BASE_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_SEPOLIA].v3CoreFactoryAddress, 
+     // TODO: Gnosis + Moonbeam contracts to be deployed
+-    [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].v3CoreFactoryAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].v3CoreFactoryAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].v3CoreFactoryAddress });
++    [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].v3CoreFactoryAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].v3CoreFactoryAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].v3CoreFactoryAddress, [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ROBINHOOD].v3CoreFactoryAddress });
+ exports.QUOTER_V2_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0x61fFE014bA17989E743c5F6cB21bF9697530B21e')), { [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].quoterAddress, [sdk_core_1.ChainId.CELO_ALFAJORES]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO_ALFAJORES].quoterAddress, [sdk_core_1.ChainId.OPTIMISM_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM_GOERLI].quoterAddress, [sdk_core_1.ChainId.OPTIMISM_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].quoterAddress, [sdk_core_1.ChainId.ARBITRUM_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_GOERLI].quoterAddress, [sdk_core_1.ChainId.ARBITRUM_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].quoterAddress, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].quoterAddress, [sdk_core_1.ChainId.BASE_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_GOERLI].quoterAddress, [sdk_core_1.ChainId.BASE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE].quoterAddress, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].quoterAddress, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].quoterAddress, [sdk_core_1.ChainId.ZKSYNC]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZKSYNC].quoterAddress, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].quoterAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.MONAD_TESTNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD_TESTNET].quoterAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].quoterAddress, [sdk_core_1.ChainId.BASE_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_SEPOLIA].quoterAddress, 
+     // TODO: Gnosis + Moonbeam contracts to be deployed
+-    [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].quoterAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].quoterAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].quoterAddress });
+-exports.NEW_QUOTER_V2_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3')), { [sdk_core_1.ChainId.CELO]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.CELO_ALFAJORES]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.OPTIMISM_SEPOLIA]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.SEPOLIA]: '0xf0c802dcb0cf1c4f7b953756b49d940eed190221', [sdk_core_1.ChainId.ARBITRUM_SEPOLIA]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.BNB]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.AVALANCHE]: '0xf0c802dcb0cf1c4f7b953756b49d940eed190221', [sdk_core_1.ChainId.POLYGON_MUMBAI]: '0x60e06b92bC94a665036C26feC5FF2A92E2d04c5f', [sdk_core_1.ChainId.BASE]: '0x222cA98F00eD15B1faE10B61c277703a194cf5d2', [sdk_core_1.ChainId.BLAST]: '0x9D0F15f2cf58655fDDcD1EE6129C547fDaeD01b1', [sdk_core_1.ChainId.ZORA]: '0x9D0F15f2cf58655fDDcD1EE6129C547fDaeD01b1', [sdk_core_1.ChainId.ZKSYNC]: '0x071Bd2063dF031EDd110E27C6F4CDe50A3DeF2d4', [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].quoterAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.MONAD_TESTNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD_TESTNET].quoterAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].quoterAddress, [sdk_core_1.ChainId.BASE_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].quoterAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].quoterAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].quoterAddress });
+-exports.PROTOCOL_V4_QUOTER_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0xf3a39c86dbd13c45365e57fb90fe413371f65af8')), { [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].v4QuoterAddress, [sdk_core_1.ChainId.ARBITRUM_ONE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_ONE].v4QuoterAddress, [sdk_core_1.ChainId.BASE]: '0xe1a6c5803e3c44368b171bd680c7d32dfc92ca47', [sdk_core_1.ChainId.POLYGON]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.POLYGON].v4QuoterAddress, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].v4QuoterAddress, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].v4QuoterAddress, [sdk_core_1.ChainId.OPTIMISM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM].v4QuoterAddress, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].v4QuoterAddress, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].v4QuoterAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].v4QuoterAddress, [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].v4QuoterAddress, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].v4QuoterAddress, [sdk_core_1.ChainId.MAINNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MAINNET].v4QuoterAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].v4QuoterAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].v4QuoterAddress, [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].v4QuoterAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].v4QuoterAddress });
++    [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].quoterAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].quoterAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].quoterAddress, [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ROBINHOOD].quoterAddress });
++exports.NEW_QUOTER_V2_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3')), { [sdk_core_1.ChainId.CELO]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.CELO_ALFAJORES]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.OPTIMISM_SEPOLIA]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.SEPOLIA]: '0xf0c802dcb0cf1c4f7b953756b49d940eed190221', [sdk_core_1.ChainId.ARBITRUM_SEPOLIA]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.BNB]: '0x5e55C9e631FAE526cd4B0526C4818D6e0a9eF0e3', [sdk_core_1.ChainId.AVALANCHE]: '0xf0c802dcb0cf1c4f7b953756b49d940eed190221', [sdk_core_1.ChainId.POLYGON_MUMBAI]: '0x60e06b92bC94a665036C26feC5FF2A92E2d04c5f', [sdk_core_1.ChainId.BASE]: '0x222cA98F00eD15B1faE10B61c277703a194cf5d2', [sdk_core_1.ChainId.BLAST]: '0x9D0F15f2cf58655fDDcD1EE6129C547fDaeD01b1', [sdk_core_1.ChainId.ZORA]: '0x9D0F15f2cf58655fDDcD1EE6129C547fDaeD01b1', [sdk_core_1.ChainId.ZKSYNC]: '0x071Bd2063dF031EDd110E27C6F4CDe50A3DeF2d4', [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].quoterAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.MONAD_TESTNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD_TESTNET].quoterAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].quoterAddress, [sdk_core_1.ChainId.BASE_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_SEPOLIA].quoterAddress, [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].quoterAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].quoterAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].quoterAddress, [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ROBINHOOD].quoterAddress });
++exports.PROTOCOL_V4_QUOTER_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0xf3a39c86dbd13c45365e57fb90fe413371f65af8')), { [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].v4QuoterAddress, [sdk_core_1.ChainId.ARBITRUM_ONE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_ONE].v4QuoterAddress, [sdk_core_1.ChainId.BASE]: '0xe1a6c5803e3c44368b171bd680c7d32dfc92ca47', [sdk_core_1.ChainId.POLYGON]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.POLYGON].v4QuoterAddress, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].v4QuoterAddress, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].v4QuoterAddress, [sdk_core_1.ChainId.OPTIMISM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM].v4QuoterAddress, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].v4QuoterAddress, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].v4QuoterAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].v4QuoterAddress, [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].v4QuoterAddress, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].v4QuoterAddress, [sdk_core_1.ChainId.MAINNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MAINNET].v4QuoterAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].v4QuoterAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].v4QuoterAddress, [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].v4QuoterAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].v4QuoterAddress, [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ROBINHOOD].v4QuoterAddress });
+ exports.MIXED_ROUTE_QUOTER_V1_ADDRESSES = {
+     [sdk_core_1.ChainId.MAINNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MAINNET].mixedRouteQuoterV1Address,
+     [sdk_core_1.ChainId.GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.GOERLI].mixedRouteQuoterV1Address,
+@@ -51,13 +51,13 @@ exports.MIXED_ROUTE_QUOTER_V2_ADDRESSES = {
+ };
+ exports.UNISWAP_MULTICALL_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0x1F98415757620B543A52E61c46B32eB19261F984')), { [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].multicallAddress, [sdk_core_1.ChainId.CELO_ALFAJORES]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO_ALFAJORES].multicallAddress, [sdk_core_1.ChainId.OPTIMISM_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM_GOERLI].multicallAddress, [sdk_core_1.ChainId.OPTIMISM_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM_SEPOLIA].multicallAddress, [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].multicallAddress, [sdk_core_1.ChainId.ARBITRUM_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_GOERLI].multicallAddress, [sdk_core_1.ChainId.ARBITRUM_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_SEPOLIA].multicallAddress, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].multicallAddress, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].multicallAddress, [sdk_core_1.ChainId.BASE_GOERLI]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_GOERLI].multicallAddress, [sdk_core_1.ChainId.BASE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE].multicallAddress, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].multicallAddress, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].multicallAddress, [sdk_core_1.ChainId.ZKSYNC]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZKSYNC].multicallAddress, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].multicallAddress, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].multicallAddress, [sdk_core_1.ChainId.MONAD_TESTNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD_TESTNET].multicallAddress, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].multicallAddress, [sdk_core_1.ChainId.BASE_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE_SEPOLIA].multicallAddress, 
+     // TODO: Gnosis + Moonbeam contracts to be deployed
+-    [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].multicallAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].multicallAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].multicallAddress });
++    [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].multicallAddress, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].multicallAddress, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].multicallAddress, [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ROBINHOOD].multicallAddress });
+ const SWAP_ROUTER_02_ADDRESSES = (chainId) => {
+     var _a;
+     return ((_a = (0, sdk_core_1.SWAP_ROUTER_02_ADDRESSES)(chainId)) !== null && _a !== void 0 ? _a : '0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45');
+ };
+ exports.SWAP_ROUTER_02_ADDRESSES = SWAP_ROUTER_02_ADDRESSES;
+-exports.STATE_VIEW_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0x1F98415757620B543A52E61c46B32eB19261F984')), { [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].v4StateView, [sdk_core_1.ChainId.ARBITRUM_ONE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_ONE].v4StateView, [sdk_core_1.ChainId.BASE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE].v4StateView, [sdk_core_1.ChainId.POLYGON]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.POLYGON].v4StateView, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].v4StateView, [sdk_core_1.ChainId.OPTIMISM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM].v4StateView, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].v4StateView, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].v4StateView, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].v4StateView, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].v4StateView, [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].v4StateView, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].v4StateView, [sdk_core_1.ChainId.MAINNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MAINNET].v4StateView, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].v4StateView, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].v4StateView, [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].v4StateView, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].v4StateView });
++exports.STATE_VIEW_ADDRESSES = Object.assign(Object.assign({}, constructSameAddressMap('0x1F98415757620B543A52E61c46B32eB19261F984')), { [sdk_core_1.ChainId.SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SEPOLIA].v4StateView, [sdk_core_1.ChainId.ARBITRUM_ONE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_ONE].v4StateView, [sdk_core_1.ChainId.BASE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BASE].v4StateView, [sdk_core_1.ChainId.POLYGON]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.POLYGON].v4StateView, [sdk_core_1.ChainId.BNB]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BNB].v4StateView, [sdk_core_1.ChainId.OPTIMISM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.OPTIMISM].v4StateView, [sdk_core_1.ChainId.AVALANCHE]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.AVALANCHE].v4StateView, [sdk_core_1.ChainId.WORLDCHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.WORLDCHAIN].v4StateView, [sdk_core_1.ChainId.ZORA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ZORA].v4StateView, [sdk_core_1.ChainId.UNICHAIN_SEPOLIA]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN_SEPOLIA].v4StateView, [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.UNICHAIN].v4StateView, [sdk_core_1.ChainId.BLAST]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.BLAST].v4StateView, [sdk_core_1.ChainId.MAINNET]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MAINNET].v4StateView, [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.SONEIUM].v4StateView, [sdk_core_1.ChainId.MONAD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.MONAD].v4StateView, [sdk_core_1.ChainId.CELO]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.CELO].v4StateView, [sdk_core_1.ChainId.XLAYER]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.XLAYER].v4StateView, [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ROBINHOOD].v4StateView });
+ exports.OVM_GASPRICE_ADDRESS = '0x420000000000000000000000000000000000000F';
+ exports.ARB_GASINFO_ADDRESS = '0x000000000000000000000000000000000000006C';
+ exports.TICK_LENS_ADDRESS = sdk_core_1.CHAIN_TO_ADDRESSES_MAP[sdk_core_1.ChainId.ARBITRUM_ONE].tickLensAddress;
+@@ -93,6 +93,7 @@ exports.WETH9 = {
+     [sdk_core_1.ChainId.UNICHAIN]: sdk_core_1.WETH9[sdk_core_1.ChainId.UNICHAIN],
+     [sdk_core_1.ChainId.SONEIUM]: sdk_core_1.WETH9[sdk_core_1.ChainId.SONEIUM],
+     [sdk_core_1.ChainId.XLAYER]: sdk_core_1.WETH9[sdk_core_1.ChainId.XLAYER],
++    [sdk_core_1.ChainId.ROBINHOOD]: sdk_core_1.WETH9[sdk_core_1.ChainId.ROBINHOOD],
+ };
+ exports.BEACON_CHAIN_DEPOSIT_ADDRESS = '0x00000000219ab540356cBB839Cbe05303d7705Fa';
+ function getAddressLowerCase(currency) {
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/util/chains.js b/node_modules/@uniswap/smart-order-router/build/main/util/chains.js
+index 452a77e..0ae9d04 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/util/chains.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/util/chains.js
+@@ -30,6 +30,7 @@ exports.SUPPORTED_CHAINS = [
+     sdk_core_1.ChainId.BASE_SEPOLIA,
+     sdk_core_1.ChainId.SONEIUM,
+     sdk_core_1.ChainId.XLAYER,
++    sdk_core_1.ChainId.ROBINHOOD,
+     // Gnosis and Moonbeam don't yet have contracts deployed yet
+ ];
+ exports.V2_SUPPORTED = [
+@@ -47,6 +48,7 @@ exports.V2_SUPPORTED = [
+     sdk_core_1.ChainId.UNICHAIN,
+     sdk_core_1.ChainId.SONEIUM,
+     sdk_core_1.ChainId.XLAYER,
++    sdk_core_1.ChainId.ROBINHOOD,
+ ];
+ exports.V4_SUPPORTED = [
+     sdk_core_1.ChainId.MAINNET,
+@@ -64,6 +66,7 @@ exports.V4_SUPPORTED = [
+     sdk_core_1.ChainId.SONEIUM,
+     sdk_core_1.ChainId.CELO,
+     sdk_core_1.ChainId.XLAYER,
++    sdk_core_1.ChainId.ROBINHOOD,
+ ];
+ exports.MIXED_SUPPORTED = [
+     sdk_core_1.ChainId.MAINNET,
+@@ -172,6 +175,8 @@ const ID_TO_CHAIN_ID = (id) => {
+             return sdk_core_1.ChainId.UNICHAIN;
+         case 1868:
+             return sdk_core_1.ChainId.SONEIUM;
++        case 4663:
++            return sdk_core_1.ChainId.ROBINHOOD;
+         case 196:
+             return sdk_core_1.ChainId.XLAYER;
+         default:
+@@ -346,6 +351,11 @@ exports.NATIVE_NAMES_BY_ID = {
+         'OKB',
+         '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+     ],
++    [sdk_core_1.ChainId.ROBINHOOD]: [
++        'ETH',
++        'ETH',
++        '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
++    ],
+ };
+ exports.NATIVE_CURRENCY = {
+     [sdk_core_1.ChainId.MAINNET]: NativeCurrencyName.ETHER,
+@@ -377,6 +387,7 @@ exports.NATIVE_CURRENCY = {
+     [sdk_core_1.ChainId.UNICHAIN]: NativeCurrencyName.ETHER,
+     [sdk_core_1.ChainId.SONEIUM]: NativeCurrencyName.ETHER,
+     [sdk_core_1.ChainId.XLAYER]: NativeCurrencyName.XLAYER,
++    [sdk_core_1.ChainId.ROBINHOOD]: NativeCurrencyName.ETHER,
+ };
+ const ID_TO_NETWORK_NAME = (id) => {
+     switch (id) {
+@@ -438,6 +449,8 @@ const ID_TO_NETWORK_NAME = (id) => {
+             return ChainName.MONAD;
+         case 1868:
+             return ChainName.SONEIUM;
++        case 4663:
++            return 'robinhood-mainnet';
+         case 196:
+             return ChainName.XLAYER;
+         default:
+@@ -500,6 +513,8 @@ const ID_TO_PROVIDER = (id) => {
+             return process.env.JSON_RPC_PROVIDER_UNICHAIN;
+         case sdk_core_1.ChainId.SONEIUM:
+             return process.env.JSON_RPC_PROVIDER_SONEIUM;
++        case sdk_core_1.ChainId.ROBINHOOD:
++            return process.env.JSON_RPC_PROVIDER_ROBINHOOD;
+         case sdk_core_1.ChainId.XLAYER:
+             return process.env.JSON_RPC_PROVIDER_XLAYER;
+         default:
+@@ -541,6 +556,7 @@ exports.WRAPPED_NATIVE_CURRENCY = {
+     [sdk_core_1.ChainId.BASE_SEPOLIA]: new sdk_core_1.Token(sdk_core_1.ChainId.BASE_SEPOLIA, '0x4200000000000000000000000000000000000006', 18, 'WETH', 'Wrapped Ether'),
+     [sdk_core_1.ChainId.SONEIUM]: new sdk_core_1.Token(sdk_core_1.ChainId.SONEIUM, '0x4200000000000000000000000000000000000006', 18, 'WETH', 'Wrapped Ether'),
+     [sdk_core_1.ChainId.XLAYER]: new sdk_core_1.Token(sdk_core_1.ChainId.XLAYER, '0xe538905cf8410324e03A5A23C1c177a474D59b2b', 18, 'WOKB', 'Wrapped OKB'),
++    [sdk_core_1.ChainId.ROBINHOOD]: new sdk_core_1.Token(sdk_core_1.ChainId.ROBINHOOD, '0x0Bd7D308f8E1639FAb988df18A8011f41EAcAD73', 18, 'WETH', 'Wrapped Ether'),
+ };
+ function isMatic(chainId) {
+     return chainId === sdk_core_1.ChainId.POLYGON_MUMBAI || chainId === sdk_core_1.ChainId.POLYGON;
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/util/defaultBlocksToLive.js b/node_modules/@uniswap/smart-order-router/build/main/util/defaultBlocksToLive.js
+index 856231d..b6667a3 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/util/defaultBlocksToLive.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/util/defaultBlocksToLive.js
+@@ -51,5 +51,6 @@ exports.DEFAULT_BLOCKS_TO_LIVE = {
+     // (60 minutes) / (1 seconds) = 3600
+     [sdk_core_1.ChainId.SONEIUM]: 3600,
+     [sdk_core_1.ChainId.XLAYER]: 3600,
++    [sdk_core_1.ChainId.ROBINHOOD]: 3600,
+ };
+ //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGVmYXVsdEJsb2Nrc1RvTGl2ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlsL2RlZmF1bHRCbG9ja3NUb0xpdmUudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsZ0RBQTRDO0FBRS9CLFFBQUEsc0JBQXNCLEdBQW1DO0lBQ3BFLG1DQUFtQztJQUNuQyxDQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQUUsR0FBRztJQUN0QixDQUFDLGtCQUFPLENBQUMsTUFBTSxDQUFDLEVBQUUsR0FBRztJQUNyQixDQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQUUsR0FBRztJQUN0QixvQ0FBb0M7SUFDcEMsQ0FBQyxrQkFBTyxDQUFDLFFBQVEsQ0FBQyxFQUFFLElBQUk7SUFDeEIsQ0FBQyxrQkFBTyxDQUFDLGVBQWUsQ0FBQyxFQUFFLElBQUk7SUFDL0IsQ0FBQyxrQkFBTyxDQUFDLGdCQUFnQixDQUFDLEVBQUUsSUFBSTtJQUNoQyxDQUFDLGtCQUFPLENBQUMsSUFBSSxDQUFDLEVBQUUsSUFBSTtJQUNwQixDQUFDLGtCQUFPLENBQUMsSUFBSSxDQUFDLEVBQUUsSUFBSTtJQUNwQixDQUFDLGtCQUFPLENBQUMsV0FBVyxDQUFDLEVBQUUsSUFBSTtJQUMzQixDQUFDLGtCQUFPLENBQUMsWUFBWSxDQUFDLEVBQUUsSUFBSTtJQUM1QixDQUFDLGtCQUFPLENBQUMsWUFBWSxDQUFDLEVBQUUsSUFBSTtJQUM1QixDQUFDLGtCQUFPLENBQUMsS0FBSyxDQUFDLEVBQUUsSUFBSTtJQUNyQixtQ0FBbUM7SUFDbkMsbUNBQW1DO0lBQ25DLENBQUMsa0JBQU8sQ0FBQyxVQUFVLENBQUMsRUFBRSxLQUFLO0lBQzNCLG9DQUFvQztJQUNwQyxDQUFDLGtCQUFPLENBQUMsZ0JBQWdCLENBQUMsRUFBRSxJQUFJO0lBQ2hDLENBQUMsa0JBQU8sQ0FBQyxRQUFRLENBQUMsRUFBRSxJQUFJO0lBQ3hCLENBQUMsa0JBQU8sQ0FBQyxhQUFhLENBQUMsRUFBRSxJQUFJO0lBQzdCLENBQUMsa0JBQU8sQ0FBQyxLQUFLLENBQUMsRUFBRSxJQUFJO0lBQ3JCLDRDQUE0QztJQUM1QyxDQUFDLGtCQUFPLENBQUMsWUFBWSxDQUFDLEVBQUUsS0FBSztJQUM3QixDQUFDLGtCQUFPLENBQUMsZUFBZSxDQUFDLEVBQUUsS0FBSztJQUNoQyxDQUFDLGtCQUFPLENBQUMsZ0JBQWdCLENBQUMsRUFBRSxLQUFLO0lBQ2pDLG9DQUFvQztJQUNwQyxDQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQUUsSUFBSTtJQUN2QixDQUFDLGtCQUFPLENBQUMsY0FBYyxDQUFDLEVBQUUsSUFBSTtJQUM5QixtQ0FBbUM7SUFDbkMsQ0FBQyxrQkFBTyxDQUFDLElBQUksQ0FBQyxFQUFFLEdBQUc7SUFDbkIsQ0FBQyxrQkFBTyxDQUFDLGNBQWMsQ0FBQyxFQUFFLEdBQUc7SUFDN0IsbUNBQW1DO0lBQ25DLENBQUMsa0JBQU8sQ0FBQyxNQUFNLENBQUMsRUFBRSxHQUFHO0lBQ3JCLG1DQUFtQztJQUNuQyxDQUFDLGtCQUFPLENBQUMsUUFBUSxDQUFDLEVBQUUsR0FBRztJQUN2QixvQ0FBb0M7SUFDcEMsQ0FBQyxrQkFBTyxDQUFDLEdBQUcsQ0FBQyxFQUFFLElBQUk7SUFDbkIsb0NBQW9DO0lBQ3BDLENBQUMsa0JBQU8sQ0FBQyxTQUFTLENBQUMsRUFBRSxJQUFJO0lBQ3pCLG9DQUFvQztJQUNwQyxDQUFDLGtCQUFPLENBQUMsU0FBUyxDQUFDLEVBQUUsR0FBRztJQUN4QixvQ0FBb0M7SUFDcEMsQ0FBQyxrQkFBTyxDQUFDLE1BQU0sQ0FBQyxFQUFFLElBQUk7SUFDdEIsQ0FBQyxrQkFBTyxDQUFDLGFBQWEsQ0FBQyxFQUFFLElBQUk7SUFDN0Isb0NBQW9DO0lBQ3BDLENBQUMsa0JBQU8sQ0FBQyxPQUFPLENBQUMsRUFBRSxJQUFJO0lBQ3ZCLENBQUMsa0JBQU8sQ0FBQyxNQUFNLENBQUMsRUFBRSxJQUFJO0NBQ3ZCLENBQUMifQ==
+\ No newline at end of file
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/util/pool.js b/node_modules/@uniswap/smart-order-router/build/main/util/pool.js
+index 98b83d3..9dd66ec 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/util/pool.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/util/pool.js
+@@ -39,5 +39,6 @@ exports.V4_ETH_WETH_FAKE_POOL = {
+     [sdk_core_1.ChainId.MONAD]: new v4_sdk_1.Pool((0, chains_1.nativeOnChain)(sdk_core_1.ChainId.MONAD), (0, chains_1.nativeOnChain)(sdk_core_1.ChainId.MONAD).wrapped, 0, FAKE_TICK_SPACING, router_sdk_1.ADDRESS_ZERO, 79228162514264337593543950336, 0, 0),
+     [sdk_core_1.ChainId.SONEIUM]: new v4_sdk_1.Pool((0, chains_1.nativeOnChain)(sdk_core_1.ChainId.SONEIUM), (0, chains_1.nativeOnChain)(sdk_core_1.ChainId.SONEIUM).wrapped, 0, FAKE_TICK_SPACING, router_sdk_1.ADDRESS_ZERO, 79228162514264337593543950336, 0, 0),
+     [sdk_core_1.ChainId.XLAYER]: new v4_sdk_1.Pool((0, chains_1.nativeOnChain)(sdk_core_1.ChainId.XLAYER), (0, chains_1.nativeOnChain)(sdk_core_1.ChainId.XLAYER).wrapped, 0, FAKE_TICK_SPACING, router_sdk_1.ADDRESS_ZERO, 79228162514264337593543950336, 0, 0),
++    [sdk_core_1.ChainId.ROBINHOOD]: new v4_sdk_1.Pool((0, chains_1.nativeOnChain)(sdk_core_1.ChainId.ROBINHOOD), (0, chains_1.nativeOnChain)(sdk_core_1.ChainId.ROBINHOOD).wrapped, 0, FAKE_TICK_SPACING, router_sdk_1.ADDRESS_ZERO, 79228162514264337593543950336, 0, 0),
+ };
+ //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoicG9vbC5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlsL3Bvb2wudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsb0RBQW1EO0FBQ25ELGdEQUE0QztBQUM1Qyw0Q0FBaUQ7QUFFakQscUNBQXlDO0FBRXpDLE1BQU0saUJBQWlCLEdBQUcsQ0FBQyxDQUFDO0FBRWYsUUFBQSxxQkFBcUIsR0FBcUM7SUFDckUsQ0FBQyxrQkFBTyxDQUFDLE9BQU8sQ0FBQyxFQUFFLElBQUksYUFBTSxDQUMzQixJQUFBLHNCQUFhLEVBQUMsa0JBQU8sQ0FBQyxPQUFPLENBQUMsRUFDOUIsSUFBQSxzQkFBYSxFQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLENBQUMsT0FBTyxFQUN0QyxDQUFDLEVBQ0QsaUJBQWlCLEVBQ2pCLHlCQUFZLEVBQ1osNkJBQTZCLEVBQzdCLENBQUMsRUFDRCxDQUFDLENBQ0Y7SUFDRCxDQUFDLGtCQUFPLENBQUMsTUFBTSxDQUFDLEVBQUUsSUFBSSxhQUFNLENBQzFCLElBQUEsc0JBQWEsRUFBQyxrQkFBTyxDQUFDLE1BQU0sQ0FBQyxFQUM3QixJQUFBLHNCQUFhLEVBQUMsa0JBQU8sQ0FBQyxNQUFNLENBQUMsQ0FBQyxPQUFPLEVBQ3JDLENBQUMsRUFDRCxpQkFBaUIsRUFDakIseUJBQVksRUFDWiw2QkFBNkIsRUFDN0IsQ0FBQyxFQUNELENBQUMsQ0FDRjtJQUNELENBQUMsa0JBQU8sQ0FBQyxPQUFPLENBQUMsRUFBRSxJQUFJLGFBQU0sQ0FDM0IsSUFBQSxzQkFBYSxFQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQzlCLElBQUEsc0JBQWEsRUFBQyxrQkFBTyxDQUFDLE9BQU8sQ0FBQyxDQUFDLE9BQU8sRUFDdEMsQ0FBQyxFQUNELGlCQUFpQixFQUNqQix5QkFBWSxFQUNaLDZCQUE2QixFQUM3QixDQUFDLEVBQ0QsQ0FBQyxDQUNGO0lBQ0QsQ0FBQyxrQkFBTyxDQUFDLFFBQVEsQ0FBQyxFQUFF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
+\ No newline at end of file

@@ -392,4 +392,8 @@ export const HOOKS_ADDRESSES_ALLOWLIST: { [chain in ChainId]: Array<string> } = 
   [ChainId.XLAYER]: [ADDRESS_ZERO, AEGIS_V3],
   [ChainId.LINEA]: [ADDRESS_ZERO],
   [ChainId.TEMPO]: [ADDRESS_ZERO, UNISWAP_AGG_HOOK_ON_TEMPO],
+  [ChainId.MEGAETH]: [ADDRESS_ZERO],
+  [ChainId.ARC]: [ADDRESS_ZERO],
+  [ChainId.ROBINHOOD]: [ADDRESS_ZERO],
+  [ChainId.INK]: [ADDRESS_ZERO],
 }

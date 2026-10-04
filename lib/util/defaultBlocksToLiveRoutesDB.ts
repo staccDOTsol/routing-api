@@ -57,4 +57,8 @@ export const DEFAULT_BLOCKS_TO_LIVE_ROUTES_DB: { [chain in ChainId]: number } = 
   [ChainId.XLAYER]: 60,
   [ChainId.LINEA]: 60,
   [ChainId.TEMPO]: 60,
+  [ChainId.MEGAETH]: 60,
+  [ChainId.ARC]: 60,
+  [ChainId.ROBINHOOD]: 60,
+  [ChainId.INK]: 60,
 }
