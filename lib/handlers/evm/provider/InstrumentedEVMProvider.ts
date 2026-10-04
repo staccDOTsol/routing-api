@@ -22,6 +22,23 @@ export type InstrumentedEVMProviderProps = {
   name: ProviderName
 }
 
+const RPC_RETRIES = 2
+const RPC_RETRY_DELAY_MS = 200
+const TRANSIENT_RPC_MESSAGE =
+  /upstream|time(d)? ?out|rate limit|too many requests|temporar|unavailable|try again|please retry|header not found|block not found|unknown block/i
+
+/**
+ * True when the transport failed (timeout, 5xx, dropped socket, truncated body) or the node behind the proxy did:
+ * asking again can succeed. A revert is an answer, never retried.
+ */
+export function isTransientRpcError(error: any): boolean {
+  if (error?.code === 'TIMEOUT') return true
+  if (error?.code !== 'SERVER_ERROR') return false
+  // a JSON-RPC error object reaches us wrapped by ethers as "processing response error"
+  if (error.reason === 'processing response error') return TRANSIENT_RPC_MESSAGE.test(String(error.error?.message ?? ''))
+  return error.status === undefined || error.status >= 500 || error.status === 429 || error.status === 408
+}
+
 export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvider {
   private readonly name: ProviderName
   private readonly metricPrefix: string
@@ -30,6 +47,22 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
     super(url, network)
     this.name = name
     this.metricPrefix = `RPC_${this.name}_${this.network.chainId}`
+  }
+
+  /**
+   * A quote is 25 to 35 reads and one failed read fails the quote. The RPC behind this deployment is one proxy
+   * that stalls for a few seconds now and then, so a read that fails in transit is asked again.
+   */
+  override async send(method: string, params: Array<any>): Promise<any> {
+    for (let attempt = 0; ; attempt++) {
+      try {
+        return await super.send(method, params)
+      } catch (error) {
+        if (attempt >= RPC_RETRIES || method === 'eth_sendRawTransaction' || !isTransientRpcError(error)) throw error
+        metric.putMetric(`${this.metricPrefix}_RETRY`, 1, MetricLoggerUnit.Count)
+        await new Promise((resolve) => setTimeout(resolve, RPC_RETRY_DELAY_MS * (attempt + 1)))
+      }
+    }
   }
 
   override call(transaction: Deferrable<TransactionRequest>, blockTag?: BlockTag | Promise<BlockTag>): Promise<string> {
