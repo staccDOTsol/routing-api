@@ -15,11 +15,14 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { chainProtocols as allChainProtocols } from '../../lib/cron/cache-config'
+import { chainProtocols as allChainProtocols, hasPoolSource } from '../../lib/cron/cache-config'
 import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
 
-// Pool cache crons only for the chains this deployment routes.
-export const chainProtocols = allChainProtocols.filter((c) => SUPPORTED_CHAINS.includes(c.chainId))
+// Pool cache crons only for the chains this deployment routes and can index.
+// A job with no readable pool source only fails and holds a concurrency slot while it retries.
+export const chainProtocols = allChainProtocols.filter(
+  (c) => SUPPORTED_CHAINS.includes(c.chainId) && hasPoolSource(c.protocol, c.chainId)
+)
 import { STAGE } from '../../lib/util/stage'
 import { PoolCachingFilePrefixes } from '../../lib/util/poolCachingFilePrefixes'
 import { ChainId } from '@uniswap/sdk-core'

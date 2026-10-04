@@ -155,6 +155,14 @@ const GRAPH_SUBGRAPH_IDS: { [protocol: string]: { [chainId: number]: string } } 
 }
 // The Graph's indexers reject pages over 3600 rows.
 const GRAPH_PAGE_SIZE = process.env.GRAPH_API_KEY ? 1000 : undefined
+/**
+ * True when this deployment can actually read a pool list for the pair: a Graph id we have a key for, or Base v4
+ * through the bearer-token URL. With GRAPH_API_KEY unset it is true for everything (upstream's own credentials).
+ */
+export const hasPoolSource = (protocol: string, chainId: ChainId) =>
+  !process.env.GRAPH_API_KEY ||
+  !!GRAPH_SUBGRAPH_IDS[protocol]?.[chainId] ||
+  (protocol === 'V4' && chainId === ChainId.BASE && !!process.env.GRAPH_BASE_V4_SUBGRAPH_ID)
 const graphUrl = (protocol: 'V2' | 'V3' | 'V4', chainId: ChainId) => {
   const id = GRAPH_SUBGRAPH_IDS[protocol][chainId]
   return process.env.GRAPH_API_KEY && id
