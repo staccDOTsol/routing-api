@@ -78,8 +78,16 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       uniGraphQLHeaderOrigin,
     } = props
 
+    // which chains have an RPC and on which host, never the URL itself: a keyed endpoint is a credential
+    const chainsByRpcHost: { [host: string]: string[] } = {}
+    for (const [name, url] of Object.entries(jsonRpcProviders)) {
+      const host = url.replace(/^https?:\/\/([^/]+).*$/, '$1')
+      ;(chainsByRpcHost[host] = chainsByRpcHost[host] ?? []).push(name.replace('WEB3_RPC_', ''))
+    }
     new CfnOutput(this, 'jsonRpcProviders', {
-      value: JSON.stringify(jsonRpcProviders),
+      value: Object.entries(chainsByRpcHost)
+        .map(([host, chains]) => `${host}: ${chains.join(',')}`)
+        .join('; '),
     })
 
     const lambdaRole = new aws_iam.Role(this, 'RoutingLambdaRole', {

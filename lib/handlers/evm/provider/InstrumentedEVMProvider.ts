@@ -39,26 +39,61 @@ export function isTransientRpcError(error: any): boolean {
   return error.status === undefined || error.status >= 500 || error.status === 429 || error.status === 408
 }
 
+/** The endpoint with its key hidden: a path segment of 20 or more URL-safe characters is a credential. */
+export const maskRpcUrl = (url: string) => url.replace(/\/[A-Za-z0-9_-]{20,}(?=[/?#]|$)/g, '/***')
+
+/**
+ * ethers copies the endpoint URL into every transport error (message, stack, the `url` field) and then into the
+ * error it wraps that one in. With a keyed endpoint that would write the key to the logs, so it is masked here,
+ * before anything else sees the error.
+ */
+export function scrubRpcError(error: any, url: string): any {
+  const masked = maskRpcUrl(url)
+  if (!url || masked === url) return error
+  const seen = new Set<any>()
+  const walk = (e: any) => {
+    if (!e || typeof e !== 'object' || seen.has(e)) return
+    seen.add(e)
+    for (const k of ['message', 'stack', 'url']) {
+      if (typeof e[k] === 'string' && e[k].includes(url)) {
+        try {
+          e[k] = e[k].split(url).join(masked)
+        } catch {
+          // a frozen error keeps its text; nothing else to do
+        }
+      }
+    }
+    walk(e.error)
+    walk(e.serverError)
+  }
+  walk(error)
+  return error
+}
+
 export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvider {
   private readonly name: ProviderName
   private readonly metricPrefix: string
+  private readonly rpcUrl: string
 
   constructor({ url, network, name }: InstrumentedEVMProviderProps) {
     super(url, network)
     this.name = name
     this.metricPrefix = `RPC_${this.name}_${this.network.chainId}`
+    this.rpcUrl = typeof url === 'string' ? url : url?.url ?? ''
   }
 
   /**
-   * A quote is 25 to 35 reads and one failed read fails the quote. The RPC behind this deployment is one proxy
-   * that stalls for a few seconds now and then, so a read that fails in transit is asked again.
+   * A quote is 25 to 70 reads and one failed read fails the quote, so a read that fails in transit (timeout, 5xx,
+   * a node that says its upstream failed) is asked again. Errors leave here with the endpoint's key masked.
    */
   override async send(method: string, params: Array<any>): Promise<any> {
     for (let attempt = 0; ; attempt++) {
       try {
         return await super.send(method, params)
       } catch (error) {
-        if (attempt >= RPC_RETRIES || method === 'eth_sendRawTransaction' || !isTransientRpcError(error)) throw error
+        if (attempt >= RPC_RETRIES || method === 'eth_sendRawTransaction' || !isTransientRpcError(error)) {
+          throw scrubRpcError(error, this.rpcUrl)
+        }
         metric.putMetric(`${this.metricPrefix}_RETRY`, 1, MetricLoggerUnit.Count)
         await new Promise((resolve) => setTimeout(resolve, RPC_RETRY_DELAY_MS * (attempt + 1)))
       }

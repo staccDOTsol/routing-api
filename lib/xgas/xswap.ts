@@ -1,5 +1,6 @@
 import Joi from '@hapi/joi'
 import { BigNumber, ethers } from 'ethers'
+import { rpcProvider } from './rpc'
 
 /**
  * Crosschain legs go through xgas.dev XSwap: X Money escrowed on Robinhood (4663), a bonded solver delivers on the
@@ -100,7 +101,8 @@ export type XSwapRequest = {
 
 export async function quoteXSwap(
   req: XSwapRequest,
-  provider: ethers.providers.Provider = new ethers.providers.StaticJsonRpcProvider(cfg().rpc, XSWAP_HOME_CHAIN_ID)
+  provider: ethers.providers.Provider = rpcProvider(XSWAP_HOME_CHAIN_ID) ??
+    new ethers.providers.StaticJsonRpcProvider(cfg().rpc, XSWAP_HOME_CHAIN_ID)
 ): Promise<XSwapQuote | XSwapError> {
   const bad = (errorCode: string, detail: string): XSwapError => ({ statusCode: 400, errorCode, detail })
   const { intents, asks, xmoney } = cfg()

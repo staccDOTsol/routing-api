@@ -1,6 +1,7 @@
 import Joi from '@hapi/joi'
 import { CHAIN_TO_ADDRESSES_MAP } from '@uniswap/sdk-core'
 import { BigNumber, ethers } from 'ethers'
+import { rpcProvider } from './rpc'
 
 /**
  * Crosschain through an omni-peg claim: one claim token at one address on every chain, each chain with its own
@@ -49,10 +50,7 @@ export type OmniQuote = {
 }
 export type OmniError = { statusCode: 400 | 404; errorCode: string; detail: string }
 
-const providerFor = (chainId: number) => {
-  const url = process.env[`WEB3_RPC_${chainId}`]
-  return url ? new ethers.providers.StaticJsonRpcProvider(url, chainId) : null
-}
+const providerFor = rpcProvider
 const poolKey = (claim: string) => ({ currency0: ZERO, currency1: claim, fee: NATIVE_FEE, tickSpacing: NATIVE_SPACING, hooks: ZERO })
 const quoter = (chainId: number, provider: ethers.providers.Provider) => {
   const address = (CHAIN_TO_ADDRESSES_MAP as any)[chainId]?.v4QuoterAddress
