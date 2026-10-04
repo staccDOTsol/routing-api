@@ -4,8 +4,16 @@ import JSBI from 'jsbi'
 import { TradeTypeParam } from './schema/quote-schema'
 import { computePortionAmount, parseDeadline, parseSlippageTolerance, populateFeeOptions } from '../shared'
 import { PermitSingle } from '@uniswap/permit2-sdk'
-import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion } from '@uniswap/universal-router-sdk'
+import { UNIVERSAL_ROUTER_ADDRESS, UniversalRouterVersion, URVersion } from '@uniswap/universal-router-sdk'
 import { utils } from 'ethers'
+
+/**
+ * Which layout of the v4 swap actions the router at UNIVERSAL_ROUTER_ADDRESS(version, chainId) decodes: 2.1 added
+ * maxHopSlippage to the swap structs, and a router handed the other layout reverts with no reason. Robinhood has a
+ * single Universal Router and it is a 2.1 build (it answers eip712Domain()), whatever version the caller names.
+ */
+export const v4ActionsLayout = (version: UniversalRouterVersion, chainId: ChainId): URVersion =>
+  version === UniversalRouterVersion.V2_1 || chainId === ChainId.ROBINHOOD ? URVersion.V2_1 : URVersion.V2_0
 
 export type SwapOptionsUniversalRouterInput = {
   chainId: ChainId
@@ -136,6 +144,7 @@ export class SwapOptionsFactory {
     const swapParams: SwapOptions = {
       type: SwapType.UNIVERSAL_ROUTER,
       version: universalRouterVersion,
+      urVersion: v4ActionsLayout(universalRouterVersion, chainId),
       deadlineOrPreviousBlockhash: deadline ? parseDeadline(deadline) : undefined,
       recipient: recipient,
       slippageTolerance: parseSlippageTolerance(slippageTolerance),
