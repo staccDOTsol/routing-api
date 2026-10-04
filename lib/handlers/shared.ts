@@ -14,7 +14,25 @@ export const SECONDS_PER_BLOCK_BY_CHAIN_ID: { [chainId in ChainId]?: number } = 
   [ChainId.MAINNET]: 30,
 }
 
+/**
+ * ROUTE_SEARCH=small, for a Lambda capped at 512 MB (about a third of a vCPU). Upstream's search on most chains is
+ * 20 amounts per route and up to 7 splits: thousands of on-chain quotes, seconds of ABI work and hundreds of MB of
+ * call data there, and the quote ends at the 20 s timeout or out of memory. Small keeps every route but prices
+ * each at 4 amounts (25% steps) and splits a trade over at most 3 of them.
+ */
+const SMALL_SEARCH = process.env.ROUTE_SEARCH === 'small'
+
 export const DEFAULT_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
+  const config = UPSTREAM_ROUTING_CONFIG_BY_CHAIN(chainId)
+  if (!SMALL_SEARCH) return config
+  return {
+    ...config,
+    distributionPercent: Math.max(config.distributionPercent, 25),
+    maxSplits: Math.min(config.maxSplits, 3),
+  }
+}
+
+const UPSTREAM_ROUTING_CONFIG_BY_CHAIN = (chainId: ChainId): AlphaRouterConfig => {
   switch (chainId) {
     case ChainId.BLAST:
       return {

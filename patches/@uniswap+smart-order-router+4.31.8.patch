@@ -302,6 +302,25 @@ index 856231d..b6667a3 100644
  };
  //# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGVmYXVsdEJsb2Nrc1RvTGl2ZS5qcyIsInNvdXJjZVJvb3QiOiIiLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy91dGlsL2RlZmF1bHRCbG9ja3NUb0xpdmUudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsZ0RBQTRDO0FBRS9CLFFBQUEsc0JBQXNCLEdBQW1DO0lBQ3BFLG1DQUFtQztJQUNuQyxDQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQUUsR0FBRztJQUN0QixDQUFDLGtCQUFPLENBQUMsTUFBTSxDQUFDLEVBQUUsR0FBRztJQUNyQixDQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQUUsR0FBRztJQUN0QixvQ0FBb0M7SUFDcEMsQ0FBQyxrQkFBTyxDQUFDLFFBQVEsQ0FBQyxFQUFFLElBQUk7SUFDeEIsQ0FBQyxrQkFBTyxDQUFDLGVBQWUsQ0FBQyxFQUFFLElBQUk7SUFDL0IsQ0FBQyxrQkFBTyxDQUFDLGdCQUFnQixDQUFDLEVBQUUsSUFBSTtJQUNoQyxDQUFDLGtCQUFPLENBQUMsSUFBSSxDQUFDLEVBQUUsSUFBSTtJQUNwQixDQUFDLGtCQUFPLENBQUMsSUFBSSxDQUFDLEVBQUUsSUFBSTtJQUNwQixDQUFDLGtCQUFPLENBQUMsV0FBVyxDQUFDLEVBQUUsSUFBSTtJQUMzQixDQUFDLGtCQUFPLENBQUMsWUFBWSxDQUFDLEVBQUUsSUFBSTtJQUM1QixDQUFDLGtCQUFPLENBQUMsWUFBWSxDQUFDLEVBQUUsSUFBSTtJQUM1QixDQUFDLGtCQUFPLENBQUMsS0FBSyxDQUFDLEVBQUUsSUFBSTtJQUNyQixtQ0FBbUM7SUFDbkMsbUNBQW1DO0lBQ25DLENBQUMsa0JBQU8sQ0FBQyxVQUFVLENBQUMsRUFBRSxLQUFLO0lBQzNCLG9DQUFvQztJQUNwQyxDQUFDLGtCQUFPLENBQUMsZ0JBQWdCLENBQUMsRUFBRSxJQUFJO0lBQ2hDLENBQUMsa0JBQU8sQ0FBQyxRQUFRLENBQUMsRUFBRSxJQUFJO0lBQ3hCLENBQUMsa0JBQU8sQ0FBQyxhQUFhLENBQUMsRUFBRSxJQUFJO0lBQzdCLENBQUMsa0JBQU8sQ0FBQyxLQUFLLENBQUMsRUFBRSxJQUFJO0lBQ3JCLDRDQUE0QztJQUM1QyxDQUFDLGtCQUFPLENBQUMsWUFBWSxDQUFDLEVBQUUsS0FBSztJQUM3QixDQUFDLGtCQUFPLENBQUMsZUFBZSxDQUFDLEVBQUUsS0FBSztJQUNoQyxDQUFDLGtCQUFPLENBQUMsZ0JBQWdCLENBQUMsRUFBRSxLQUFLO0lBQ2pDLG9DQUFvQztJQUNwQyxDQUFDLGtCQUFPLENBQUMsT0FBTyxDQUFDLEVBQUUsSUFBSTtJQUN2QixDQUFDLGtCQUFPLENBQUMsY0FBYyxDQUFDLEVBQUUsSUFBSTtJQUM5QixtQ0FBbUM7SUFDbkMsQ0FBQyxrQkFBTyxDQUFDLElBQUksQ0FBQyxFQUFFLEdBQUc7SUFDbkIsQ0FBQyxrQkFBTyxDQUFDLGNBQWMsQ0FBQyxFQUFFLEdBQUc7SUFDN0IsbUNBQW1DO0lBQ25DLENBQUMsa0JBQU8sQ0FBQyxNQUFNLENBQUMsRUFBRSxHQUFHO0lBQ3JCLG1DQUFtQztJQUNuQyxDQUFDLGtCQUFPLENBQUMsUUFBUSxDQUFDLEVBQUUsR0FBRztJQUN2QixvQ0FBb0M7SUFDcEMsQ0FBQyxrQkFBTyxDQUFDLEdBQUcsQ0FBQyxFQUFFLElBQUk7SUFDbkIsb0NBQW9DO0lBQ3BDLENBQUMsa0JBQU8sQ0FBQyxTQUFTLENBQUMsRUFBRSxJQUFJO0lBQ3pCLG9DQUFvQztJQUNwQyxDQUFDLGtCQUFPLENBQUMsU0FBUyxDQUFDLEVBQUUsR0FBRztJQUN4QixvQ0FBb0M7SUFDcEMsQ0FBQyxrQkFBTyxDQUFDLE1BQU0sQ0FBQyxFQUFFLElBQUk7SUFDdEIsQ0FBQyxrQkFBTyxDQUFDLGFBQWEsQ0FBQyxFQUFFLElBQUk7SUFDN0Isb0NBQW9DO0lBQ3BDLENBQUMsa0JBQU8sQ0FBQyxPQUFPLENBQUMsRUFBRSxJQUFJO0lBQ3ZCLENBQUMsa0JBQU8sQ0FBQyxNQUFNLENBQUMsRUFBRSxJQUFJO0NBQ3ZCLENBQUMifQ==
 \ No newline at end of file
+diff --git a/node_modules/@uniswap/smart-order-router/build/main/util/gas-factory-helpers.js b/node_modules/@uniswap/smart-order-router/build/main/util/gas-factory-helpers.js
+index 164acf2..0122563 100644
+--- a/node_modules/@uniswap/smart-order-router/build/main/util/gas-factory-helpers.js
++++ b/node_modules/@uniswap/smart-order-router/build/main/util/gas-factory-helpers.js
+@@ -4,12 +4,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+ };
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.logGasEstimationVsSimulationMetrics = exports.calculateL1GasFeesHelper = exports.initSwapRouteFromExisting = exports.calculateGasUsed = exports.getL2ToL1GasUsed = exports.calculateOptimismToL1FeeFromCalldata = exports.calculateArbitrumToL1FeeFromCalldata = exports.getArbitrumBytes = exports.getGasCostInNativeCurrency = exports.getHighestLiquidityV3USDPool = exports.getHighestLiquidityV3NativePool = exports.getV2NativePool = void 0;
+-const sdk_1 = require("@eth-optimism/sdk");
++const sdk_1 = { get estimateL1Gas() { return require("@eth-optimism/sdk").estimateL1Gas; }, get estimateL1GasCost() { return require("@eth-optimism/sdk").estimateL1GasCost; } };
+ const bignumber_1 = require("@ethersproject/bignumber");
+ const router_sdk_1 = require("@uniswap/router-sdk");
+ const sdk_core_1 = require("@uniswap/sdk-core");
+ const universal_router_sdk_1 = require("@uniswap/universal-router-sdk");
+-const brotli_1 = __importDefault(require("brotli"));
++const brotli_1 = { get default() { return __importDefault(require("brotli")).default; } };
+ const jsbi_1 = __importDefault(require("jsbi"));
+ const lodash_1 = __importDefault(require("lodash"));
+ const routers_1 = require("../routers");
 diff --git a/node_modules/@uniswap/smart-order-router/build/main/util/pool.js b/node_modules/@uniswap/smart-order-router/build/main/util/pool.js
 index 98b83d3..9dd66ec 100644
 --- a/node_modules/@uniswap/smart-order-router/build/main/util/pool.js

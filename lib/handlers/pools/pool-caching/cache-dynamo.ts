@@ -1,4 +1,4 @@
-import { DynamoDB } from 'aws-sdk'
+import DynamoDB from 'aws-sdk/clients/dynamodb'
 
 export interface IDynamoCache<TPKey, TSortKey, TVal> {
   get(partitionKey: TPKey, sortKey?: TSortKey): Promise<TVal | undefined>

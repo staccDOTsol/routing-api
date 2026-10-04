@@ -12,7 +12,9 @@ import {
   routeToString,
   SupportedRoutes,
 } from '@uniswap/smart-order-router'
-import { AWSError, DynamoDB, Lambda } from 'aws-sdk'
+import DynamoDB from 'aws-sdk/clients/dynamodb'
+import Lambda from 'aws-sdk/clients/lambda'
+import { AWSError } from 'aws-sdk/lib/error'
 import { ChainId, Currency, CurrencyAmount, Fraction, Token, TradeType } from '@uniswap/sdk-core'
 import { Protocol } from '@uniswap/router-sdk'
 import { SwapOptions } from '@uniswap/smart-order-router'

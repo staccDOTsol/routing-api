@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
-import { capMemory } from './lambda-memory'
+import { capMemory, smallLambda } from './lambda-memory'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
@@ -114,6 +114,15 @@ export class RoutingLambdaStack extends cdk.NestedStack {
 
     const region = cdk.Stack.of(this).region
 
+    // Upstream: a minified bundle read back through its source map at run time. A small Lambda keeps identifiers
+    // (so a stack trace still names its functions) and drops the map, which it has no memory to load.
+    const routingBundling: aws_lambda_nodejs.BundlingOptions = smallLambda
+      ? { minify: false, sourceMap: false, esbuildArgs: { '--minify-whitespace': true, '--minify-syntax': true } }
+      : { minify: true, sourceMap: true }
+    const routingRuntimeEnv: { [name: string]: string } = smallLambda
+      ? { ROUTE_SEARCH: 'small' }
+      : { NODE_OPTIONS: '--enable-source-maps' }
+
     const cachingRoutingLambda = new aws_lambda_nodejs.NodejsFunction(this, 'CachingRoutingLambda', {
       role: lambdaRole,
       runtime: aws_lambda.Runtime.NODEJS_22_X,
@@ -123,17 +132,14 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       timeout: cdk.Duration.seconds(30),
       memorySize: capMemory(5120),
       deadLetterQueueEnabled: true,
-      bundling: {
-        minify: true,
-        sourceMap: true,
-      },
+      bundling: routingBundling,
 
       awsSdkConnectionReuse: true,
 
       description: 'Caching Routing Lambda',
       environment: {
         VERSION: '5',
-        NODE_OPTIONS: '--enable-source-maps',
+        ...routingRuntimeEnv,
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
         POOL_CACHE_GZIP_KEY: poolCacheGzipKey,
@@ -189,17 +195,14 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       timeout: cdk.Duration.seconds(stage === STAGE.BETA ? 18 : 20),
       memorySize: capMemory(5120),
       deadLetterQueueEnabled: true,
-      bundling: {
-        minify: true,
-        sourceMap: true,
-      },
+      bundling: routingBundling,
 
       awsSdkConnectionReuse: true,
 
       description: 'Routing Lambda',
       environment: {
         VERSION: '33',
-        NODE_OPTIONS: '--enable-source-maps',
+        ...routingRuntimeEnv,
         POOL_CACHE_BUCKET: poolCacheBucket.bucketName,
         POOL_CACHE_BUCKET_3: poolCacheBucket3.bucketName,
         POOL_CACHE_GZIP_KEY: poolCacheGzipKey,
