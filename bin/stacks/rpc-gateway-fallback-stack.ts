@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
+import { capMemory } from './lambda-memory'
 import { aws_cloudwatch, aws_cloudwatch_actions, aws_iam, aws_lambda, aws_lambda_nodejs } from 'aws-cdk-lib'
 import { Construct } from 'constructs'
 import path from 'path'
@@ -37,7 +38,7 @@ export class RpcGatewayFallbackStack extends cdk.NestedStack {
       entry: path.join(__dirname, '../../lib/rpc/handler/index.ts'),
       handler: 'fallbackHandler',
       timeout: cdk.Duration.seconds(15),
-      memorySize: 1024,
+      memorySize: capMemory(1024),
       description: 'Provider Fallback Lambda',
       bundling: {
         minify: true,

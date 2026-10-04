@@ -1,4 +1,5 @@
 import { Protocol } from '@uniswap/router-sdk'
+import { capMemory } from './lambda-memory'
 import * as cdk from 'aws-cdk-lib'
 import { Duration } from 'aws-cdk-lib'
 import * as aws_cloudwatch from 'aws-cdk-lib/aws-cloudwatch'
@@ -14,7 +15,11 @@ import * as aws_s3 from 'aws-cdk-lib/aws-s3'
 import * as aws_sns from 'aws-cdk-lib/aws-sns'
 import { Construct } from 'constructs'
 import * as path from 'path'
-import { chainProtocols } from '../../lib/cron/cache-config'
+import { chainProtocols as allChainProtocols } from '../../lib/cron/cache-config'
+import { SUPPORTED_CHAINS } from '../../lib/handlers/injector-sor'
+
+// Pool cache crons only for the chains this deployment routes.
+export const chainProtocols = allChainProtocols.filter((c) => SUPPORTED_CHAINS.includes(c.chainId))
 import { STAGE } from '../../lib/util/stage'
 import { PoolCachingFilePrefixes } from '../../lib/util/poolCachingFilePrefixes'
 import { ChainId } from '@uniswap/sdk-core'
@@ -330,7 +335,7 @@ export class RoutingCachingStack extends cdk.NestedStack {
           entry: path.join(__dirname, '../../lib/cron/cache-pools.ts'),
           handler: 'handler',
           timeout: Duration.seconds(900),
-          memorySize: chainId === ChainId.BASE ? 5120 : 2560,
+          memorySize: capMemory(chainId === ChainId.BASE ? 5120 : 2560),
           bundling: {
             minify: true,
             sourceMap: true,

@@ -17,7 +17,7 @@ import { RoutingLambdaStack } from './routing-lambda-stack'
 import { RoutingDatabaseStack } from './routing-database-stack'
 import { TESTNETS } from '../../lib/util/testNets'
 import { RpcGatewayFallbackStack } from './rpc-gateway-fallback-stack'
-import { chainProtocols } from '../../lib/cron/cache-config'
+import { chainProtocols } from './routing-caching-stack'
 
 export const CHAINS_NOT_MONITORED: ChainId[] = TESTNETS
 

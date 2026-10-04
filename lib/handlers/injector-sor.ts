@@ -93,7 +93,7 @@ import {
 import { NEW_CACHED_ROUTES_ROLLOUT_PERCENT } from '../util/newCachedRoutesRolloutPercent'
 import { TENDERLY_NEW_ENDPOINT_ROLLOUT_PERCENT } from '../util/tenderlyNewEndpointRolloutPercent'
 
-export const SUPPORTED_CHAINS: ChainId[] = [
+const UPSTREAM_CHAINS: ChainId[] = [
   ChainId.MAINNET,
   ChainId.OPTIMISM,
   ChainId.ARBITRUM_ONE,
@@ -116,7 +116,16 @@ export const SUPPORTED_CHAINS: ChainId[] = [
   ChainId.SONEIUM,
   ChainId.XLAYER,
 ]
-const DEFAULT_TOKEN_LIST = 'https://gateway.ipfs.io/ipns/tokens.uniswap.org'
+// ROUTED_CHAIN_IDS (comma list) narrows the chains this deployment routes. Each chain costs init memory and
+// a set of pool cache crons, so a small account runs a few; unset, it routes everything upstream does.
+const routedIds = (process.env.ROUTED_CHAIN_IDS ?? '')
+  .split(',')
+  .map((v) => parseInt(v.trim()))
+  .filter((n) => !isNaN(n))
+export const SUPPORTED_CHAINS: ChainId[] = routedIds.length
+  ? UPSTREAM_CHAINS.filter((c) => routedIds.includes(c))
+  : UPSTREAM_CHAINS
+const DEFAULT_TOKEN_LIST = 'https://tokens.uniswap.org'
 
 export interface RequestInjected<Router> extends BaseRInj {
   chainId: ChainId

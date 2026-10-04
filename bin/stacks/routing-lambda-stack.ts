@@ -1,4 +1,5 @@
 import * as cdk from 'aws-cdk-lib'
+import { capMemory } from './lambda-memory'
 import { CfnOutput, Duration } from 'aws-cdk-lib'
 import * as aws_dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import * as asg from 'aws-cdk-lib/aws-applicationautoscaling'
@@ -112,7 +113,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       handler: 'quoteHandler',
       // 04/18/2025: async routing lambda can have much longer timeout
       timeout: cdk.Duration.seconds(30),
-      memorySize: 5120,
+      memorySize: capMemory(5120),
       deadLetterQueueEnabled: true,
       bundling: {
         minify: true,
@@ -155,6 +156,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         GQL_URL: uniGraphQLEndpoint,
         GQL_H_ORGN: uniGraphQLHeaderOrigin,
         ...jsonRpcProviders,
+        ROUTED_CHAIN_IDS: process.env.ROUTED_CHAIN_IDS ?? '',
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
@@ -177,7 +179,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
       // log the response in the event of a failure on our end.
       // Beta uses a higher timeout to allow for more thorough routing exploration.
       timeout: cdk.Duration.seconds(stage === STAGE.BETA ? 18 : 9),
-      memorySize: 5120,
+      memorySize: capMemory(5120),
       deadLetterQueueEnabled: true,
       bundling: {
         minify: true,
@@ -221,6 +223,7 @@ export class RoutingLambdaStack extends cdk.NestedStack {
         GQL_H_ORGN: uniGraphQLHeaderOrigin,
         CACHING_ROUTING_LAMBDA_FUNCTION_NAME: cachingRoutingLambda.functionName,
         ...jsonRpcProviders,
+        ROUTED_CHAIN_IDS: process.env.ROUTED_CHAIN_IDS ?? '',
       },
       layers: [
         aws_lambda.LayerVersion.fromLayerVersionArn(
