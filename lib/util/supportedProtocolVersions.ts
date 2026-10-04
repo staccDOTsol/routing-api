@@ -5,7 +5,8 @@ export const SUPPORTED_PROTOCOL_VERSIONS = [Protocol.V2, Protocol.V3, Protocol.V
 
 export function convertStringRouterVersionToEnum(routerVersion?: string): UniversalRouterVersion {
   const validVersions = Object.values(UniversalRouterVersion)
-  return validVersions.find((v) => v === routerVersion) || UniversalRouterVersion.V1_2
+  // No header means the current Universal Router: without it v4 pools, which is most of xgas, are never routed.
+  return validVersions.find((v) => v === routerVersion) || UniversalRouterVersion.V2_0
 }
 
 export type URVersionsToProtocolVersionsMapping = {
