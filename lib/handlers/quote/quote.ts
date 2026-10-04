@@ -285,7 +285,8 @@ export class QuoteHandler extends APIGLambdaHandler<
       tokenInAddress,
       tokenOutAddress,
       universalRouterVersion,
-      protocolsStr,
+      // upstream's default with no protocols is v3 alone; xgas pools are mostly v4, so ask for everything
+      protocolsStr ?? ['v2', 'v3', 'v4'],
       forceCrossProtocol
     )
 
