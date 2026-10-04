@@ -43,7 +43,7 @@ export class QuoteHandlerInjector extends InjectorSOR<
       enableDebug,
     } = requestQueryParams
 
-    const { dependencies, activityId } = containerInjected
+    const { dependenciesFor, activityId } = containerInjected
 
     const requestId = context.awsRequestId
     const quoteId = requestId.substring(0, 5)
@@ -85,7 +85,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
     const chainId = tokenInChainId
     const chainIdEnum = ID_TO_CHAIN_ID(chainId)
 
-    if (!dependencies[chainIdEnum]) {
+    // built on the first quote for this chain, then reused by this Lambda instance
+    const dependencies = await dependenciesFor(chainIdEnum)
+    if (!dependencies) {
       // Request validation should prevent reject unsupported chains with 4xx already, so this should not be possible.
       throw new Error(`No container injected dependencies for chain: ${chainIdEnum}`)
     }
@@ -115,9 +117,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
       v4PoolParams,
       cachedRoutesCacheInvalidationFixRolloutPercentage,
       deleteCacheEnabledChains,
-    } = dependencies[chainIdEnum]!
+    } = dependencies
 
-    let onChainQuoteProvider = dependencies[chainIdEnum]!.onChainQuoteProvider
+    let onChainQuoteProvider = dependencies.onChainQuoteProvider
     let gasPriceProvider = gasPriceProviderOnChain
     if (gasPriceWei) {
       const gasPriceWeiBN = BigNumber.from(gasPriceWei)
