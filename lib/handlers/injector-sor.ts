@@ -82,6 +82,7 @@ import {
 import { v4 } from 'uuid/index'
 import { chainProtocols } from '../cron/cache-config'
 import { StaccpadV4SubgraphProvider } from '../xgas/staccpad-pools'
+import { NoTokenFeeFetcher, RecentGasPriceProvider, SkipNativeTokenProvider } from '../xgas/light-providers'
 import { Protocol } from '@uniswap/router-sdk'
 import { UniJsonRpcProvider } from '../rpc/UniJsonRpcProvider'
 import { GraphQLTokenFeeFetcher } from '../graphql/graphql-token-fee-fetcher'
@@ -160,7 +161,7 @@ export type ContainerDependencies = {
   v2QuoteProvider: V2QuoteProvider
   simulator: Simulator
   routeCachingProvider?: IRouteCachingProvider
-  tokenValidatorProvider: TokenValidatorProvider
+  tokenValidatorProvider?: TokenValidatorProvider
   tokenPropertiesProvider: ITokenPropertiesProvider
   v2Supported: ChainId[]
   v4Supported?: ChainId[]
@@ -179,6 +180,11 @@ export interface ContainerInjected {
   dependenciesFor: (chainId: ChainId) => Promise<ContainerDependencies | undefined>
   activityId?: string
 }
+
+// Chains where neither Uniswap's token validator nor its fee-on-transfer detector is deployed (eth_getCode is empty
+// at both addresses). Calling them was three failed multicalls and a handful of failed eth_calls on every quote,
+// each logged as an error. A claim's transfer tax is read from the claim itself (lib/xgas/claim-tax.ts).
+const NO_TOKEN_LENS_CHAINS: ChainId[] = [ChainId.ROBINHOOD]
 
 // Chains warmed while the Lambda initialises, so their first quote does not wait for the build (comma list).
 // The rest are built on first use: all of them at once does not fit a 512 MB Lambda and made every cold start
@@ -334,15 +340,19 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       },
     })
 
-    const tokenValidatorProvider = new TokenValidatorProvider(
-      chainId,
-      multicall2Provider,
-      new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
-    )
+    const hasTokenLens = !NO_TOKEN_LENS_CHAINS.includes(chainId)
+    const tokenValidatorProvider = hasTokenLens
+      ? new TokenValidatorProvider(
+          chainId,
+          multicall2Provider,
+          new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false }))
+        )
+      : undefined
     const tokenPropertiesProvider = new TokenPropertiesProvider(
       chainId,
       new NodeJSCache(new NodeCache({ stdTTL: 30000, useClones: false })),
-      trafficSwitcherTokenFetcher
+      // with no GraphQL endpoint configured the GraphQL fetcher only throws and falls back: go to the chain directly
+      !hasTokenLens ? new NoTokenFeeFetcher() : process.env.GQL_URL ? trafficSwitcherTokenFetcher : onChainTokenFeeFetcher
     )
     const underlyingV2PoolProvider = new V2PoolProvider(chainId, multicall2Provider, tokenPropertiesProvider)
     const v2PoolProvider = new CachingV2PoolProvider(
@@ -387,11 +397,13 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       )) as V2AWSSubgraphProvider,
     ])
 
-    const tokenProvider = new CachingTokenProviderWithFallback(
-      chainId,
-      tokenCache,
-      tokenListProvider,
-      new TokenProvider(chainId, multicall2Provider)
+    const tokenProvider = new SkipNativeTokenProvider(
+      new CachingTokenProviderWithFallback(
+        chainId,
+        tokenCache,
+        tokenListProvider,
+        new TokenProvider(chainId, multicall2Provider)
+      )
     )
 
     // Some providers like Infura set a gas limit per call of 10x block gas which is approx 150m
@@ -547,7 +559,11 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
         ? CACHING_ROUTING_LAMBDA_FUNCTION_NAME
         : AWS_LAMBDA_FUNCTION_NAME!
 
-    if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '') {
+    // Upstream's RoutesDB is off unless ROUTES_DB_CACHE=on. It is only read when a request names every protocol
+    // including `mixed` (the default here is v2,v3,v4), it is kept fresh by invoking a second Lambda per pair, and
+    // an entry lives for 24 hours; left on, every quote paid for a write that no quote read. A repeat pair is
+    // served from memory instead (lib/xgas/hot-routes.ts), priced on chain every time, for 15 seconds.
+    if (CACHED_ROUTES_TABLE_NAME && CACHED_ROUTES_TABLE_NAME !== '' && process.env.ROUTES_DB_CACHE === 'on') {
       routeCachingProvider = new DynamoRouteCachingProvider({
         routesTableName: ROUTES_TABLE_NAME!,
         routesCachingRequestFlagTableName: ROUTES_CACHING_REQUEST_FLAG_TABLE_NAME!,
@@ -662,14 +678,16 @@ export abstract class InjectorSOR<Router, QueryParams> extends Injector<
       multicallProvider: multicall2Provider,
       tokenProvider,
       tokenProviderFromTokenList: tokenListProvider,
-      gasPriceProvider: new CachingGasStationProvider(
-        chainId,
-        new OnChainGasPriceProvider(
+      gasPriceProvider: new RecentGasPriceProvider(
+        new CachingGasStationProvider(
           chainId,
-          new EIP1559GasPriceProvider(provider),
-          new LegacyGasPriceProvider(provider)
-        ),
-        new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
+          new OnChainGasPriceProvider(
+            chainId,
+            new EIP1559GasPriceProvider(provider),
+            new LegacyGasPriceProvider(provider)
+          ),
+          new NodeJSCache(new NodeCache({ stdTTL: 15, useClones: false }))
+        )
       ),
       v4SubgraphProvider,
       v3SubgraphProvider,

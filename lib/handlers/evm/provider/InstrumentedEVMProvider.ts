@@ -23,6 +23,7 @@ export type InstrumentedEVMProviderProps = {
 }
 
 const RPC_RETRIES = 2
+const BLOCK_NUMBER_REUSE_MS = 1_000
 const RPC_RETRY_DELAY_MS = 200
 const TRANSIENT_RPC_MESSAGE =
   /upstream|time(d)? ?out|rate limit|too many requests|temporar|unavailable|try again|please retry|header not found|block not found|unknown block/i
@@ -74,6 +75,7 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
   private readonly name: ProviderName
   private readonly metricPrefix: string
   private readonly rpcUrl: string
+  private recentBlockNumber?: { at: number; pending: Promise<number> }
 
   constructor({ url, network, name }: InstrumentedEVMProviderProps) {
     super(url, network)
@@ -173,7 +175,24 @@ export class InstrumentedEVMProvider extends ethers.providers.StaticJsonRpcProvi
       .finally(() => metric.putMetric(`${this.metricPrefix}_GETBLOCK_REQUESTED`, 1, MetricLoggerUnit.Count))
   }
 
+  /**
+   * One block number per second at most. Within a quote the router asks three times (once itself, once per quoter
+   * call), each a round trip taken before the read it is for; they now share the first answer, which also pins
+   * every read of the quote to one block. Quotes that follow within the second reuse it too, so a quote can be
+   * priced at a block up to a second old.
+   */
   override getBlockNumber(): Promise<number> {
+    const recent = this.recentBlockNumber
+    if (recent && Date.now() - recent.at < BLOCK_NUMBER_REUSE_MS) return recent.pending
+    const pending = this.fetchBlockNumber()
+    this.recentBlockNumber = { at: Date.now(), pending }
+    pending.catch(() => {
+      if (this.recentBlockNumber?.pending === pending) this.recentBlockNumber = undefined
+    })
+    return pending
+  }
+
+  private fetchBlockNumber(): Promise<number> {
     return super
       .getBlockNumber()
       .then(

@@ -16,6 +16,7 @@ import { ContainerInjected, InjectorSOR, RequestInjected, SUPPORTED_CHAINS } fro
 import { AWSMetricsLogger } from '../router-entities/aws-metrics-logger'
 import { StaticGasPriceProvider } from '../router-entities/static-gas-price-provider'
 import { QuoteQueryParams } from './schema/quote-schema'
+import { HotRouteAlphaRouter } from '../../xgas/hot-routes'
 export class QuoteHandlerInjector extends InjectorSOR<
   IRouter<AlphaRouterConfig | LegacyRoutingConfig>,
   QuoteQueryParams
@@ -130,7 +131,9 @@ export class QuoteHandlerInjector extends InjectorSOR<
     switch (algorithm) {
       case 'alpha':
       default:
-        router = new AlphaRouter({
+        // a caller that names its own gas price gets the full search: the short path reuses the gas models of
+        // the last search for the pair, which were built for the chain's gas price
+        router = new (gasPriceWei ? AlphaRouter : HotRouteAlphaRouter)({
           chainId,
           provider,
           v4SubgraphProvider,
