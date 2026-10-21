@@ -1,0 +1,9 @@
+{
+  "name": "xgas-ops",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The operation modules the router hosts (POST /plan, POST /things, GET /ops, and the plans GET /quote compares against). Synced from the site by scripts/sync-ops.sh. Their one dependency lives here so it cannot disturb the router's own tree.",
+  "dependencies": {
+    "viem": "2.57.2"
+  }
+}
